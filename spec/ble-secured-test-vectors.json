@@ -1,0 +1,84 @@
+{
+  "description": "Known-answer test vectors for the Secured BLE channel (Lite/Pro). All inputs are made up; none belong to a real device. J-PAKE is not covered because it uses random values.",
+  "spec": "docs/ble-secured/ble-secured-api.*.md section 4.5 and 4.8; docs/ble-secured/crypto-protocol.*.md",
+  "generated_by": "tools/ble-secured/ble_crypto_core.py (Python reference); cross-checked against tools/ble-secured/ble_secured_crypto.js",
+  "inputs": {
+    "pin": "12345678",
+    "sn": "AABBCCDDEEFF",
+    "ver": "BT_Crypto_V1",
+    "shared_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "device_nonce_hex": "0102030405060708",
+    "client_nonce_hex": "a1a2a3a4a5a6a7a8"
+  },
+  "pbkdf2": {
+    "algorithm": "PBKDF2-HMAC-SHA256, password=PIN ascii, salt=SN||ver||'PBKDF2' (utf-8), iterations=10000, dkLen=32",
+    "s_hex": "d129e243e1aa38bcb3a86d0bac57d296f452615f81d26496c27784728a531114"
+  },
+  "hkdf": {
+    "algorithm": "HKDF-SHA256, salt=device_nonce||client_nonce, L=16",
+    "ltk": {
+      "ikm": "shared_key",
+      "info": "SN||ver||'LTK'",
+      "hex": "9caad73f6d3bc622311728fde764c999"
+    },
+    "session_key": {
+      "ikm": "ltk",
+      "info": "SN||ver||'session'",
+      "hex": "36bdc4f916c9705a6ebaa3083b46c2cc"
+    },
+    "broadcast_key": {
+      "ikm": "ltk",
+      "info": "SN||ver||'broadcast'",
+      "hex": "0125b1e88c576db22dce35bc0fced57c"
+    }
+  },
+  "ccm_nonce_base": {
+    "algorithm": "HKDF-SHA256, salt=empty, L=8; 12-byte CCM nonce = base || BE32(counter)",
+    "device_to_client": {
+      "ikm": "device_nonce||client_nonce",
+      "info": "ccm-tx-nonce",
+      "hex": "8500a74bb92ecd94"
+    },
+    "client_to_device": {
+      "ikm": "client_nonce||device_nonce",
+      "info": "ccm-rx-nonce",
+      "hex": "af3ac21280b551bf"
+    }
+  },
+  "envelope": {
+    "algorithm": "AES-128-CCM with session_key, no AAD, 8-byte tag; envelope nonce is the uint32 counter",
+    "client_to_device": {
+      "ccm_nonce_hex": "af3ac21280b551bf00000001",
+      "plaintext": "{\"cmd\":\"read\"}",
+      "envelope": {
+        "nonce": 1,
+        "ct": "50ayxBnxUCOCDB9TY/Y=",
+        "tag": "e0765GzJcq8="
+      }
+    },
+    "client_to_device_counter_2": {
+      "ccm_nonce_hex": "af3ac21280b551bf00000002",
+      "plaintext": "{\"cmd\":\"wifi\",\"ssid\":\"OfficeWiFi\",\"pass\":\"router-password\"}",
+      "envelope": {
+        "nonce": 2,
+        "ct": "cUtH/6bRgWBFJz2DWrIcUBWc5ZfxJjSa3YD13MB6yE3adtW2H879mdWVPNxliNMGpcXr1v6s/ezsanA=",
+        "tag": "xBb1VQHMrMI="
+      }
+    },
+    "device_to_client": {
+      "ccm_nonce_hex": "8500a74bb92ecd9400000001",
+      "plaintext": "{\"ok\":true,\"msg\":\"ready\",\"event\":\"read\"}",
+      "envelope": {
+        "nonce": 1,
+        "ct": "Q6pk2Oeek+UeSjIsDreJIOz0qWepeKlorVihkzavYchUsnAPlMa+Qw==",
+        "tag": "2qcdfi6UYjQ="
+      }
+    }
+  },
+  "manual_pairing_code": {
+    "description": "11-digit code under the QR code (Verhoeff check digit) -> 8-digit PIN. Optional client convenience.",
+    "code11": "00852607537",
+    "pin": "12345678",
+    "invalid_example_wrong_check_digit": "00852607538"
+  }
+}

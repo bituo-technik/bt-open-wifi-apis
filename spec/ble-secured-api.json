@@ -1,0 +1,71 @@
+{
+  "id": "meter-ble-secured-json",
+  "title": "Energy meter secured BLE transport (service A003, Lite/Pro)",
+  "channel": "ble-secured",
+  "doc": {
+    "zh-CN": "docs/ble-secured/ble-secured-api.zh-CN.md",
+    "en": "docs/ble-secured/ble-secured-api.en.md",
+    "protocolReference": "docs/ble-secured/crypto-protocol.zh-CN.md"
+  },
+  "business": "spec/ble-business-commands.json",
+  "testVectors": "spec/ble-secured-test-vectors.json",
+  "gatt": {
+    "service": "0000A003-0000-1000-8000-00805F9B34FB",
+    "write": "0000C313-0000-1000-8000-00805F9B34FB",
+    "read": "0000C314-0000-1000-8000-00805F9B34FB",
+    "notify": "0000C315-0000-1000-8000-00805F9B34FB"
+  },
+  "namePrefixes": [
+    "SDM",
+    "SPM",
+    "SXM"
+  ],
+  "authMaterial": {
+    "pin": "8 digits 0-9 from the meter body (the 11 digits under the QR code decode to it; protocol only knows the 8-digit PIN)",
+    "sn": "device serial, 12 hex",
+    "ver": "d.ver from ble-crypto-ver, e.g. BT_Crypto_V1"
+  },
+  "steps": {
+    "0": "waiting round1",
+    "1": "waiting round2",
+    "2": "LTK present, waiting session-nonce",
+    "3": "channel up on THIS GATT connection"
+  },
+  "handshakeCommands": [
+    "ble-crypto-ver",
+    "ble-crypto-reset",
+    "ble-crypto-jpake-round1",
+    "ble-crypto-jpake-round2",
+    "ble-crypto-session-nonce"
+  ],
+  "flow": [
+    "scan, connect, subscribe notify C315",
+    "plain write ble-crypto-ver -> d.ver, d.step",
+    "step 0: PBKDF2 + EC J-PAKE round1/round2 -> LTK, session_key (step becomes 3)",
+    "step 2: ble-crypto-session-nonce with cached LTK (step becomes 3)",
+    "step 3 with no local session: disconnect and reconnect; never repeat J-PAKE on the same connection",
+    "send business JSON as encrypted envelope {nonce,ct,tag}; strictly serial",
+    "LTK is persisted by the device only after Wi-Fi STA association succeeds in the same encrypted session"
+  ],
+  "kdf": {
+    "pbkdf2": "HMAC-SHA256, password=PIN ascii, salt=SN||ver||'PBKDF2', 10000 iterations, 32 bytes",
+    "jpake": "secp256r1, SHA-256, identities 'client'/'server', round payloads Base64",
+    "hkdf": "SHA-256, salt=device_nonce||client_nonce; info=SN||ver||('LTK'|'session'|'broadcast'); 16 bytes",
+    "ccmNonceBase": "HKDF salt=empty L=8; device->client info 'ccm-tx-nonce' (IKM device_nonce||client_nonce); client->device info 'ccm-rx-nonce' (IKM client_nonce||device_nonce)"
+  },
+  "envelope": {
+    "cipher": "AES-128-CCM, no AAD, 8-byte tag",
+    "nonce": "uint32 counter; 12-byte CCM nonce = 8-byte HKDF base || BE32(counter); client->device must strictly increase",
+    "json": {
+      "nonce": "uint32",
+      "ct": "base64",
+      "tag": "base64"
+    }
+  },
+  "doNot": [
+    "use plaintext service A002 / C303 / C304 / C305",
+    "send pass / blepassword / resetauth",
+    "change curve, iteration count or HKDF info strings",
+    "log full LTK / session_key / broadcast_key by default"
+  ]
+}

@@ -1,0 +1,127 @@
+======== Commands / abbreviations / errors (plaintext BLE · Wi-Fi C3) ========
+GATT: service 0xA002   write 0xC303   read snapshot 0xC304   notify 0xC305
+Factory BLE password 1234. Subscribe to C305 first, then cmd=pass. Unlock before business JSON.
+Success: ok=true, no code. Failure: ok=false, with code; msg is English verbatim.
+
+-------- Session --------
+pass     write C303  {"cmd":"pass","pas":"1234","continue":true}
+         success msg=Password Correct  event=pass
+         fail Password Error / 1003; locked Please unlock / 1002 event=pas
+         with continue:true later cmds need no pas; GATT Read C304 may repeat
+         optional newpas<=16; optional auth<=40 phone binding
+blepassword  write C303  {"cmd":"blepassword","old":"1234","new":"654321"}
+         success Password yes; wrong old password Old Password Error / 1026
+read     write C303  {"cmd":"read","continue":true}  success msg=ready
+         then GATT Read C304. Locked read: Please unlock / 1002 event=read
+resetauth  write C303  clear phone binding
+
+-------- Wi-Fi provisioning (2.4 GHz only) --------
+wifi     write C303  {"cmd":"wifi","ssid":"...","pass":"..."}  ssid/pass <=64
+         success WIFI successfully (starts associating; not yet DHCP)
+         missing fields Error wifi ssid/pass required! / 1018
+         too long Error wifi length! / 1019
+wifiscan write C303  success scan started; busy scan busy / 1043
+getwifilist write C303  success d.list="ssid|rssi,..." max 10, RSSI desc
+         not ready scan not ready / 1044
+
+-------- Control --------
+restart  write C303  restart received  GATT then drops; reconnect + pass
+location write C303  location received  LED ~4 Hz for 15 s
+reset    write C303  reset received  factory reset + reboot (danger)
+zero     write C303  clear energy counters (irreversible)
+deviceName write C303  {"cmd":"deviceName","name":"..."}  name<=30
+         too long Error name length! / 1027
+
+-------- Query --------
+model    write C303  {"cmd":"model","type":1}  short keys below
+getFunctionMap write C303  d.functionMap uint16, bits below
+mqttdata write C303  topics TP/TC/TR/TM, MU/MPS; MF only if MQTT enabled
+udpdata  write C303  UDP target list in d.udp_data
+getInterval write C303  d.value WebSocket push ms (unsupported / unknow cmd if no WS)
+getModbusTlsMuxSetupStatus  LAN-TLS models only; often unsupported on SXM
+
+-------- LAN switches (change functionMap; recommend restart after) --------
+enablehttp  {"cmd":"enablehttp","enable":true|false}  plain HTTP :80  http yes / http off
+enablewebsocket  {"cmd":"enablewebsocket","enable":true}  optional enableTLS
+enablemodbustcp  {"cmd":"enablemodbustcp","enable":true}
+enabletls   {"cmd":"enabletls","enable":true}
+enablehttps PRO / LAN-TLS models only; often unsupported on plain C3 SXM
+functionMap  {"cmd":"functionMap","value":int}  overwrites full map; use with care
+         illegal combo functionMap error / 1014
+
+-------- MQTT / UDP / Modbus / OTA --------
+mqtt     {"cmd":"mqtt","data":"host|clientid|ssl|port|intervalSec|user|pass"}
+mqtr     same, then reboot. empty data -> Error mqtt data empty! / 1021
+topic1   {"cmd":"topic1","topic_post":"...","topic_set":"..."}
+topic2   {"cmd":"topic2","topic_response":"...","topic_metadata":"..."}
+modbus   {"cmd":"modbus","baud":9600,"parityStop":0,"address":1}
+         parityStop 0=N81  1=E81  2=O81  3=N82
+udp      add UDP target; full or bad IP/port -> UDP full / 1024
+deleteudp delete; missing -> UDP not found / 1025
+checkota  d.otastatus: 200 update / 404 latest / 199 low memory / other net (~8s)
+otaprogress  progress, read-only
+startota  start upgrade; optional reboot
+setInterval  {"cmd":"setInterval","value":1000}  WebSocket push ms only (100-86400000)
+cafilestart / cafiledata  MQTT TLS cert chunks
+
+-------- functionMap bits (bit15 highest) --------
+bit15 Modbus TCP     bit14 TLS (often with Modbus)
+bit13 UDP            bit12 reserved
+bit11 WebSocket      bit10 WebSocket TLS
+bit9  MQTT           bit7  HTTP :80
+bit5  LoRaWAN        others reserved
+e.g. 128 = HTTP only; HTTP+MQTT = 640; 32896 = Modbus TCP + HTTP.
+Test: functionMap & (1<<n) != 0
+
+-------- model.d short keys --------
+WN   Wi-Fi SSID
+WPN  display name
+MH   MQTT host (empty=unset)
+MF   MQTT connected (boolean in model)
+MP   MQTT port (0=unset)
+MC   MQTT ClientId
+MI   MQTT interval, milliseconds
+MS   MQTT TLS
+LSM  weak-signal mode 0/1
+UI   UDP interval, ms
+WI   WebSocket push interval, ms (may be absent)
+TS   Modbus TLS mux 0-5 (may be absent)
+MAD  485 address/baud/parity  e.g. "5 / 9600 / N81"
+
+-------- Read characteristic C304 --------
+IP    online=IPv4; offline=WiFi.status: -1 unknown 0 idle 1 SSID missing 3 assoc 4 fail 5 lost 6 disc
+RSSI  router->meter downlink dBm
+FW / SN / TP
+Electrical values are decimal strings. Parse by key presence: single-phase V I P...; three-phase VX/VY/VZ...
+Units: V / A / kW / kWh / Hz
+
+-------- mqttdata.d.MF (when MQTT enabled) --------
+-4 timeout  -3 lost  -2 TCP/TLS fail  -1 disconnected  0 connected
+1 protocol rejected  2 ClientId rejected  3 broker unavailable  4 bad auth  5 unauthorized
+If MQTT is off, MF may be absent (or some firmware still return -1).
+
+======== Error codes (plaintext BLE, 1000-range) ========
+Success has no code. Config failures often use 1000+subcode. Prefer msg over code.
+
+[Common]
+1000  auth error
+1001  not authenticated
+1002  Please unlock           (write path event=pas)
+1003  Password Error          (factory 1234)
+1004  No cmd / bad value
+1005  No data / unsupported
+1014  functionMap error
+1015  unknow cmd              (spelling is intentional)
+1018  Error wifi ssid/pass required!
+1019  Error wifi length!
+1021  Error mqtt data empty!
+1024  UDP full                (full or invalid IP/port)
+1025  UDP not found
+1026  Old Password Error
+1027  Error name length!
+1043  scan busy
+1044  scan not ready
+1050  payload too large
+
+[No code]
+illegal cmd / unsupported / timeout

@@ -1,0 +1,18 @@
+# secrets / local caches — never commit
+tools/ble-secured/ble_crypto_client_cache.json
+**/ble_crypto_client_cache*.json
+*.ltk
+.env
+
+# generated
+dist/
+**/_offline_entry.js
+**/_offline_bundle.js
+
+# python / node / OS
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+Thumbs.db
+.DS_Store

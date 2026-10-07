@@ -1,0 +1,325 @@
+{
+  "id": "meter-ble-business-json",
+  "title": "Energy meter BLE business commands (shared by plaintext and secured channels)",
+  "appliesTo": [
+    "ble-plain",
+    "ble-secured"
+  ],
+  "doc": {
+    "zh-CN": "docs/ble-common/ble-business-api.zh-CN.md",
+    "en": "docs/ble-common/ble-business-api.en.md"
+  },
+  "rule": "The Markdown document wins if this file disagrees; scripts/check_docs.py compares the command list.",
+  "wifiBand": "2.4GHz",
+  "request": {
+    "cmd": "required string; other fields per command"
+  },
+  "response": {
+    "ok": "boolean",
+    "msg": "string, english, compare verbatim",
+    "event": "usually equals cmd",
+    "code": "integer, only on failure (BLE 1000-range; config failures are 1000 + sub-code, so rely on msg when codes overlap)",
+    "d": "object, only when a query returns data"
+  },
+  "wifiStatusIp": {
+    "-1": "unknown",
+    "0": "idle",
+    "1": "ssid not found",
+    "3": "connected (usually rewritten to IPv4)",
+    "4": "connect failed",
+    "5": "connection lost",
+    "6": "disconnected",
+    "ipv4": "STA got address, provisioning succeeded"
+  },
+  "errors": [
+    {
+      "code": 1014,
+      "msg": "functionMap error"
+    },
+    {
+      "code": 1015,
+      "msg": "unknow cmd"
+    },
+    {
+      "code": 1018,
+      "msg": "Error wifi ssid/pass required!"
+    },
+    {
+      "code": 1019,
+      "msg": "Error wifi length!"
+    },
+    {
+      "code": 1021,
+      "msg": "Error mqtt data empty!"
+    },
+    {
+      "code": 1024,
+      "msg": "UDP full"
+    },
+    {
+      "code": 1025,
+      "msg": "UDP not found"
+    },
+    {
+      "code": 1027,
+      "msg": "Error name length!"
+    },
+    {
+      "code": 1043,
+      "msg": "scan busy"
+    },
+    {
+      "code": 1044,
+      "msg": "scan not ready"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "wifi",
+      "purpose": "provision 2.4GHz Wi-Fi SSID and password; most important customer API",
+      "fields": {
+        "ssid": "string <=64, required",
+        "pass": "string <=64, empty string for open networks",
+        "enableble": "bool optional; secured-BLE firmware (Lite/Pro) only: keep application GATT + service UUID advertised after Wi-Fi connects; persisted; omit = keep stored value",
+        "enablehttps": "bool optional; Pro only: persist LAN HTTPS on (effective after restart); on Pro also makes periodic UDP reports AES-CCM wrapped; omit = keep stored value"
+      },
+      "successMsg": "WIFI successfully",
+      "timeoutSec": 20,
+      "note": "acceptance does not mean DHCP done; poll GATT read IP"
+    },
+    {
+      "cmd": "wifiscan",
+      "purpose": "start async Wi-Fi scan",
+      "successMsg": "scan started",
+      "failBusy": "scan busy"
+    },
+    {
+      "cmd": "getwifilist",
+      "purpose": "get scan result after a few seconds",
+      "d": {
+        "list": "ssid|rssi,ssid2|rssi2 max 10 sorted by rssi"
+      },
+      "failNotReady": "scan not ready"
+    },
+    {
+      "cmd": "read",
+      "purpose": "prepare the snapshot characteristic for a GATT read",
+      "fields": {
+        "continue": "bool; plaintext channel only, send true; not used on the secured channel"
+      },
+      "successMsg": "ready"
+    },
+    {
+      "cmd": "restart",
+      "successMsg": "restart received"
+    },
+    {
+      "cmd": "location",
+      "purpose": "blink 4Hz 15s",
+      "successMsg": "location received"
+    },
+    {
+      "cmd": "zero",
+      "purpose": "clear energy counters, irreversible"
+    },
+    {
+      "cmd": "reset",
+      "purpose": "factory reset and reboot"
+    },
+    {
+      "cmd": "deviceName",
+      "fields": {
+        "name": "string <=30"
+      },
+      "successMsg": "deviceName yes"
+    },
+    {
+      "cmd": "model",
+      "purpose": "config snapshot",
+      "fields": {
+        "type": "optional int"
+      },
+      "dKeys": [
+        "WN",
+        "MH",
+        "WI"
+      ]
+    },
+    {
+      "cmd": "enablehttp",
+      "fields": {
+        "enable": "bool default true"
+      },
+      "successMsg": [
+        "http yes",
+        "http off"
+      ]
+    },
+    {
+      "cmd": "enablehttps",
+      "note": "PRO only",
+      "fields": {
+        "enable": "bool"
+      }
+    },
+    {
+      "cmd": "enablewebsocket",
+      "fields": {
+        "enable": "bool",
+        "enableTLS": "bool optional"
+      }
+    },
+    {
+      "cmd": "enablemodbustcp",
+      "fields": {
+        "enable": "bool"
+      }
+    },
+    {
+      "cmd": "enabletls",
+      "fields": {
+        "enable": "bool"
+      }
+    },
+    {
+      "cmd": "getFunctionMap",
+      "d": {
+        "functionMap": "uint16 bits"
+      }
+    },
+    {
+      "cmd": "functionMap",
+      "fields": {
+        "value": "uint16"
+      },
+      "note": "overwrites full bitmap, use with care"
+    },
+    {
+      "cmd": "setInterval",
+      "fields": {
+        "value": "ms 100-86400000"
+      },
+      "d": {
+        "value": "clamped ms"
+      }
+    },
+    {
+      "cmd": "getInterval",
+      "d": {
+        "value": "ms default 5000"
+      }
+    },
+    {
+      "cmd": "mqtt",
+      "fields": {
+        "data": "host|clientid|ssl|port|interval|username|password"
+      }
+    },
+    {
+      "cmd": "mqtr",
+      "purpose": "mqtt config then reboot",
+      "fields": {
+        "data": "same as mqtt"
+      }
+    },
+    {
+      "cmd": "topic1",
+      "fields": {
+        "topic_post": "string",
+        "topic_set": "string"
+      }
+    },
+    {
+      "cmd": "topic2",
+      "fields": {
+        "topic_response": "string",
+        "topic_metadata": "string"
+      }
+    },
+    {
+      "cmd": "mqttdata",
+      "d": {
+        "MF": "status",
+        "TP": "post",
+        "TC": "set",
+        "TR": "response",
+        "TM": "metadata",
+        "MU": "user",
+        "MPS": "password"
+      }
+    },
+    {
+      "cmd": "cafilestart"
+    },
+    {
+      "cmd": "cafiledata"
+    },
+    {
+      "cmd": "modbus",
+      "fields": {
+        "baud": "int",
+        "parityStop": "int: 0=N81 1=E81 2=O81 3=N82",
+        "address": "int"
+      },
+      "successMsg": "modbus yes",
+      "note": "current 485 settings readable from model.d.MAD as 'address / baud / parity'"
+    },
+    {
+      "cmd": "getModbusTlsMuxSetupStatus",
+      "d": {
+        "modbusTlsMuxSetupStatus": "0-5"
+      }
+    },
+    {
+      "cmd": "udp"
+    },
+    {
+      "cmd": "deleteudp"
+    },
+    {
+      "cmd": "udpdata"
+    },
+    {
+      "cmd": "checkota"
+    },
+    {
+      "cmd": "otaprogress"
+    },
+    {
+      "cmd": "startota"
+    },
+    {
+      "cmd": "commonmode",
+      "fields": {
+        "value": "0 BT format, 1 generic"
+      }
+    }
+  ],
+  "snapshotCharacteristic": {
+    "plain": "0000C304-0000-1000-8000-00805F9B34FB",
+    "secured": "0000C314-0000-1000-8000-00805F9B34FB (may be an encrypted envelope; decrypt first)",
+    "format": "flat json object",
+    "commonKeys": {
+      "IP": "IPv4 or wifi status decimal string",
+      "RSSI": "int dBm",
+      "FW": "firmware version string",
+      "SN": "serial",
+      "TP": "product type int"
+    },
+    "energyValuesAreStrings": true,
+    "units": {
+      "V": "V",
+      "I": "A",
+      "P": "kW",
+      "FE/RE": "kWh",
+      "F": "Hz"
+    },
+    "parse": "single-phase if V exists; three-phase if VX/VY/VZ exist; never hard-code by TP"
+  },
+  "doNot": [
+    "implement switch-config (relay products, not published)",
+    "assume 5GHz Wi-Fi",
+    "assume every model supports every command: act on ok/msg",
+    "use legacy text blepassword= or ssid><pass in customer apps"
+  ]
+}

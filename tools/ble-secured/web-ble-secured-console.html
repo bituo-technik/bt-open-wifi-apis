@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>电表加密 BLE 体验（A003 · 完整握手）</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap");
+    :root {
+      --background: #F9FAFD; --surface: #FFFFFF; --surface-muted: #EEEEEE; --border: #E2E8F0;
+      --text: #1A202C; --text-muted: #4A5568; --accent: #0066cc; --accent-hover: #0052cc;
+      --accent-focus: #0071e3; --brand: #E10600; --ok: #0a7a3e; --bad: #E10600; --warn: #b45309;
+      --dark-surface: #1A202C; --on-dark-muted: #94A3B8; --pad: 16px;
+      --radius: 4px; --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Noto Sans", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--background); color: var(--text); line-height: 1.5;
+    }
+    header {
+      padding: 20px var(--pad) 16px; border-bottom: 1px solid var(--border); background: var(--surface);
+      position: sticky; top: 0; z-index: 20;
+    }
+    header .eyebrow { color: var(--accent); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+    header h1 { margin: 6px 0 4px; font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+    header p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+    .brand-bar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+    .banner {
+      margin-top: 12px; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-muted);
+      border: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem; line-height: 1.45;
+    }
+    .layout {
+      display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+      gap: 16px; padding: var(--pad); max-width: 1280px; margin: 0 auto; align-items: start;
+    }
+    .stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .side {
+      position: sticky; top: 88px; align-self: start;
+      height: calc(100vh - 104px); min-height: 420px;
+      display: flex; flex-direction: column; min-width: 0;
+    }
+    section.card, .side.card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px;
+    }
+    .side.card { padding-bottom: 12px; }
+    h2 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 600; color: var(--text); }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin: 10px 0 6px; }
+    input, textarea, button { font: inherit; border-radius: var(--radius); }
+    input, textarea {
+      width: 100%; background: var(--surface); color: var(--text); padding: 10px 12px;
+      border: 1px solid var(--border);
+    }
+    input:focus, textarea:focus { outline: 2px solid var(--accent-focus); outline-offset: 1px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    button {
+      background: var(--accent); color: #fff; border: none; padding: 10px 14px; min-height: 40px;
+      cursor: pointer; flex: 1 1 calc(50% - 8px); font-weight: 400;
+    }
+    button:hover:not(:disabled) { background: var(--accent-hover); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+    button.secondary:hover:not(:disabled) { background: #f0f7ff; }
+    button.on { box-shadow: inset 0 0 0 2px var(--accent); }
+    .hint { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; margin-top: 8px; font-weight: 400; }
+    #devStatus, #keysBox, #advBox {
+      background: var(--surface-muted); border: 1px solid var(--border); padding: 10px; border-radius: var(--radius);
+      font-size: 0.85rem; line-height: 1.55; white-space: pre-wrap; margin-top: 10px; font-family: var(--mono);
+    }
+    #keysBox { color: var(--warn); font-size: 0.75rem; word-break: break-all; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; flex: 0 0 auto; }
+    .tabs button { flex: 1 1 auto; min-height: 36px; background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .tabs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .pane-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    .pane-body[hidden] { display: none !important; }
+    #log, #help, #meterBox, #commBox, #advLive {
+      flex: 1 1 auto; min-height: 0; overflow: auto; white-space: pre-wrap; word-break: break-word;
+      font-family: var(--mono); font-size: 0.78rem; background: #fff; padding: 10px;
+      border-radius: var(--radius); border: 1px solid var(--border);
+    }
+    .ok { color: var(--ok); } .bad { color: var(--bad); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { border-bottom: 1px solid var(--border); padding: 8px 4px; text-align: left; }
+    tr { cursor: pointer; }
+    .chk { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+    .chk input { width: auto; }
+    .inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .inline input { width: auto; flex: 1 1 80px; min-width: 70px; }
+    .adv-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+    .adv-tile { background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+    .adv-tile .k { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .adv-tile .v { font-size: 1.15rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .side { position: relative; top: 0; height: min(70vh, 560px); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+      <div class="brand-bar" style="width:100%">
+        <div>
+          <div class="eyebrow">Bituo Technik · Secured BLE</div>
+          <h1 id="uiTitle">电表加密 BLE 体验台（A003）</h1>
+          <p id="uiSubtitle">Lite/Pro · 完整 EC J-PAKE + AES-CCM · 与 Windows GUI 同协议</p>
+        </div>
+        <div class="row" style="margin:0;flex:0 0 auto;">
+          <button type="button" id="btnZh" class="on secondary" style="flex:0 0 auto;min-width:88px">中文</button>
+          <button type="button" id="btnEn" class="secondary" style="flex:0 0 auto;min-width:88px">English</button>
+        </div>
+      </div>
+    </div>
+    <div class="banner" id="banner"></div>
+  </header>
+  <div class="layout">
+    <div class="stack">
+      <section class="card">
+        <h2 id="hConn">1. 连接与安全握手</h2>
+        <div id="compat" class="hint"></div>
+        <div id="originHint" class="hint" style="color:var(--warn)"></div>
+        <label id="lblPin">配网码（二维码下方 11 位，或直接填 8 位 PIN）</label>
+        <input id="pin" type="text" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="例如 00852607537（11 位）或 12345678（8 位）" />
+        <p class="hint" id="hintPin">程序会校验位并还原为 8 位 PIN 再握手；也可直接输入 8 位 PIN。</p>
+        <label id="lblSn">SN（可空=从广播名推断）</label>
+        <input id="sn" placeholder="12 hex，如 10304B0D7760" />
+        <label class="chk"><input id="showAllBle" type="checkbox" checked /><span id="lblShowAll">显示附近全部 BLE（Windows 上名字过滤常扫不到，建议勾选）</span></label>
+        <label class="chk"><input id="autoHs" type="checkbox" checked /><span id="lblAutoHs">连接后自动安全握手</span></label>
+        <label class="chk"><input id="autoRe" type="checkbox" /><span id="lblAutoRe">断开后自动重连 GATT（连不稳时请保持关闭）</span></label>
+        <label class="chk"><input id="debugKeys" type="checkbox" /><span id="lblDebug">调试：显示密钥材料（页面 + 日志）</span></label>
+        <label id="lblLtk">LTK（可选，32 hex；设备 step=2 时填写以恢复会话）</label>
+        <input id="ltkHex" placeholder="无则留空；连不上可长按复位清 LTK 后用 PIN 重新握手" autocomplete="off" />
+        <p class="hint" id="hintLtk">若设备已有 LTK（step=2）而本页没有：在上方填入已知 LTK，或长按复位做恢复出厂后再用 PIN 完整握手。</p>
+        <div class="row">
+          <button id="btnPick">选择设备并连接</button>
+          <button id="btnHs" disabled>安全握手</button>
+          <button id="btnDisc" disabled>断开</button>
+          <button id="btnRefresh" disabled>刷新状态</button>
+        </div>
+        <div id="devStatus">未连接</div>
+        <div id="keysPanel" hidden style="margin-top:10px;">
+          <div class="hint" id="lblKeysPanel" style="margin:0 0 6px;color:var(--warn)">调试密钥（勿截图外传）</div>
+          <pre id="keysBox" style="margin:0;padding:10px;background:#0b1016;border:1px solid var(--line);border-radius:8px;font-size:0.75rem;white-space:pre-wrap;word-break:break-all;color:var(--warn)">—</pre>
+        </div>
+      </section>
+      <section class="card">
+        <h2 id="hWifi">2. Wi-Fi 配网（加密）</h2>
+        <label>SSID</label>
+        <input id="ssid" placeholder="2.4 GHz" />
+        <label id="lblWifiPass">Wi-Fi 密码（不是 PIN）</label>
+        <input id="wifiPass" type="password" />
+        <div class="row">
+          <button id="btnWifi" disabled>发送 Wi-Fi</button>
+          <button id="btnScanWifi" disabled>扫描热点</button>
+          <button id="btnListWifi" disabled>获取列表</button>
+          <button id="btnRead" disabled>读 IP / 电参</button>
+        </div>
+        <p class="hint" id="hintWifi">须先建链。业务经加密信封写 C313；读 C314 自动解密。点击列表行填入 SSID。</p>
+        <table><thead><tr><th>SSID</th><th>RSSI</th></tr></thead><tbody id="wifiRows"></tbody></table>
+      </section>
+      <section class="card">
+        <h2 id="hQuick">3. 一键命令（加密）</h2>
+        <div class="row" id="quickBtns"></div>
+        <label id="lblMb">写 Modbus RTU（485）</label>
+        <div class="inline">
+          <span id="lblMbAddr" class="hint" style="margin:0">地址</span>
+          <input id="mbAddr" type="number" min="1" max="247" value="1" />
+          <span id="lblMbBaud" class="hint" style="margin:0">波特率</span>
+          <input id="mbBaud" value="9600" />
+          <span id="lblMbParity" class="hint" style="margin:0">Parity/Stop</span>
+          <select id="mbParity" style="flex:1 1 140px;min-height:40px;border:1px solid var(--border);border-radius:var(--radius);padding:8px;">
+            <option value="0" selected>0 = N, 8, 1（默认）</option>
+            <option value="1">1 = E, 8, 1</option>
+            <option value="2">2 = O, 8, 1</option>
+            <option value="3">3 = N, 8, 2</option>
+          </select>
+          <button id="btnMb" disabled style="flex:1 1 120px">下发 modbus</button>
+        </div>
+      </section>
+      <section class="card">
+        <h2 id="hCustom">4. 自定义业务 JSON</h2>
+        <p class="hint" id="hintCustom">输入明文业务对象，页面自动加密封装发送。</p>
+        <textarea id="custom" rows="3" placeholder='{"cmd":"model","type":1}'></textarea>
+        <div class="row"><button id="btnCustom" disabled>发送（加密）</button></div>
+      </section>
+    </div>
+    <aside class="side card">
+      <div class="tabs">
+        <button class="on" data-pane="log" id="tabLog">日志</button>
+        <button data-pane="adv" id="tabAdv">业务广播</button>
+        <button data-pane="meter" id="tabMeter">电参</button>
+        <button data-pane="comm" id="tabComm">通讯</button>
+        <button data-pane="help" id="tabHelp">速查</button>
+      </div>
+      <div class="pane-body" id="pane-log">
+        <div class="row" style="margin-top:0"><button id="btnClear" class="secondary">清空日志</button></div>
+        <div id="log"></div>
+      </div>
+      <div class="pane-body" id="pane-adv" hidden>
+        <p class="hint" id="hintAdv" style="margin-top:0">握手后可用 broadcast_key 解密厂商长包（约 200ms）。网页依赖浏览器的 watchAdvertisements；多数 Windows / 手机浏览器不支持，请用 Windows GUI「业务广播」页。</p>
+        <p class="hint" id="advCapHint" style="margin-top:6px;color:var(--warn)"></p>
+        <div class="row" style="margin-top:0">
+          <button id="btnAdvStart" class="secondary" disabled>开始监听广播</button>
+          <button id="btnAdvStop" class="secondary" disabled>停止</button>
+        </div>
+        <div class="adv-grid" id="advTiles">
+          <div class="adv-tile"><div class="k">相位</div><div class="v" id="advPhase">—</div></div>
+          <div class="adv-tile"><div class="k">V</div><div class="v" id="advV">—</div></div>
+          <div class="adv-tile"><div class="k">I (A)</div><div class="v" id="advI">—</div></div>
+          <div class="adv-tile"><div class="k">P (kW)</div><div class="v" id="advP">—</div></div>
+          <div class="adv-tile"><div class="k">FE (kWh)</div><div class="v" id="advFE">—</div></div>
+          <div class="adv-tile"><div class="k">RE (kWh)</div><div class="v" id="advRE">—</div></div>
+        </div>
+        <div id="advLive" style="margin-top:8px;height:120px">等待广播…</div>
+      </div>
+      <div class="pane-body" id="pane-meter" hidden>
+        <div class="row" style="margin-top:0"><button id="btnMeter" class="secondary">刷新电参</button></div>
+        <div id="meterBox"><table><thead><tr><th>键</th><th>值</th></tr></thead><tbody id="meterRows"></tbody></table></div>
+      </div>
+      <div class="pane-body" id="pane-comm" hidden>
+        <div class="row" style="margin-top:0"><button id="btnComm" class="secondary">刷新通讯</button></div>
+        <div id="commBox">尚未查询</div>
+      </div>
+      <div class="pane-body" id="pane-help" hidden>
+        <input id="helpFilter" placeholder="过滤…" />
+        <div id="help"></div>
+      </div>
+    </aside>
+  </div>
+  <script type="module">
+import {
+  ProtocolError, ROUND1_CHUNK_LEN, PROTOCOL_VERSION_FALLBACK,
+  EcJpakeClient, derivePinKey, deriveLtk, deriveSessionKey, deriveBroadcastKey,
+  deriveNonceBase, SessionState, encryptEnvelope, decryptEnvelope,
+  randomClientNonce, inferSn, pinFromManualPairingCode, bytesToHex, hexToBytes, b64encode, b64decode,
+  selfCheckPinKey, normalizeAdvManufacturer, decryptLongManufacturer, parseLongAdvFields,
+  ADV_COMPANY_ID,
+} from "./ble_secured_crypto.js?v=20260407";
+import { HELP_ZH, HELP_EN } from "./help_text.js";
+
+const UUID = {
+  service: "0000a003-0000-1000-8000-00805f9b34fb",
+  write: "0000c313-0000-1000-8000-00805f9b34fb",
+  read: "0000c314-0000-1000-8000-00805f9b34fb",
+  notify: "0000c315-0000-1000-8000-00805f9b34fb",
+};
+const CACHE_KEY = "bleSecuredLtkCacheV1";
+const FMAP_BITS = [
+  [15, "Modbus TCP"], [14, "TLS"], [13, "UDP"], [11, "WebSocket"],
+  [10, "WebSocket TLS"], [9, "MQTT"], [7, "HTTP :80"], [5, "LoRaWAN"],
+];
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+let lang = localStorage.getItem("bleSecuredLang") || "zh";
+let device = null, server = null, writeCh = null, readCh = null, notifyCh = null;
+let session = null, sn = "", protocolVersion = PROTOCOL_VERSION_FALLBACK;
+let queue = [], chain = Promise.resolve();
+let statusBle = "disconnected", statusWifi = "—", statusComm = "—";
+let wantLink = false, reconnectBusy = false, holdDisconnect = false, linkBusy = false;
+let notifyBound = false;
+
+const QUICK = [
+  ["重启", "Restart", { cmd: "restart" }],
+  ["定位", "Locate", { cmd: "location" }],
+  ["功能图", "Function map", { cmd: "getFunctionMap" }],
+  ["配置", "Config", { cmd: "model", type: 1 }],
+  ["UDP", "UDP", { cmd: "udpdata" }],
+  ["OTA查", "OTA check", { cmd: "checkota" }],
+  ["OTA进度", "OTA prog", { cmd: "otaprogress" }],
+  ["OTA启动", "OTA start", { cmd: "startota" }],
+  ["恢复出厂设置", "Factory reset", { cmd: "reset" }],
+  ["开HTTP", "HTTP on", { cmd: "enablehttp", enable: true }],
+  ["开 Modbus TCP over Wi-Fi", "Modbus TCP over Wi-Fi", { cmd: "enablemodbustcp", enable: true }],
+  ["MQTT", "MQTT", { cmd: "mqttdata" }],
+];
+
+function t(zh, en) { return lang === "en" ? en : zh; }
+function resolvePin() {
+  const raw = document.getElementById("pin").value.trim();
+  return pinFromManualPairingCode(raw);
+}
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+function currentHelp() { return lang === "en" ? HELP_EN : HELP_ZH; }
+
+function log(msg, cls) {
+  const el = document.createElement("div");
+  if (cls) el.className = cls;
+  el.textContent = typeof msg === "string" ? msg : JSON.stringify(msg);
+  document.getElementById("log").appendChild(el);
+  document.getElementById("log").scrollTop = 1e9;
+}
+
+function loadCache() {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); } catch { return {}; }
+}
+function saveLtk(snKey, ver, ltkHex, broadcastHex) {
+  const c = loadCache();
+  const entry = { protocol_version: ver, ltk_hex: String(ltkHex).toLowerCase() };
+  if (broadcastHex && String(broadcastHex).length === 32) entry.broadcast_key_hex = String(broadcastHex).toLowerCase();
+  c[snKey] = Object.assign({}, c[snKey] || {}, entry);
+  localStorage.setItem(CACHE_KEY, JSON.stringify(c));
+}
+function getCachedLtk(snKey) {
+  const e = loadCache()[snKey] || {};
+  const manual = document.getElementById("ltkHex").value.trim().toLowerCase().replace(/\s+/g, "");
+  if (/^[0-9a-f]{32}$/.test(manual)) {
+    return {
+      protocol_version: e.protocol_version || PROTOCOL_VERSION_FALLBACK,
+      ltk_hex: manual,
+      broadcast_key_hex: e.broadcast_key_hex,
+    };
+  }
+  if (!e.ltk_hex || e.ltk_hex.length !== 32) return null;
+  return e;
+}
+function clearKeysPanel() {
+  const box = document.getElementById("keysBox");
+  if (box) box.textContent = "-";
+  const panel = document.getElementById("keysPanel");
+  if (panel && !document.getElementById("debugKeys").checked) panel.hidden = true;
+}
+function showKeys(parts) {
+  const lines = [];
+  if (parts.ltk) lines.push("LTK: " + parts.ltk);
+  if (parts.session) lines.push("session_key: " + parts.session);
+  if (parts.broadcast) lines.push("broadcast_key: " + parts.broadcast);
+  if (parts.sn) lines.push("SN: " + parts.sn);
+  if (parts.ver) lines.push("ver: " + parts.ver);
+  const text = lines.join("\n") || "-";
+  const box = document.getElementById("keysBox");
+  const panel = document.getElementById("keysPanel");
+  const debugOn = document.getElementById("debugKeys").checked;
+  if (box) box.textContent = text;
+  if (panel) panel.hidden = !debugOn;
+  if (debugOn) {
+    log("[debug] " + text.replace(/\n/g, " | "), "bad");
+  }
+}
+
+function wifiIpStatus(ip) {
+  const s = String(ip || "");
+  if (s.includes(".")) return t("已联网 ", "Online ") + s;
+  if (s === "0" || s === "") return t("未联网", "Offline");
+  return t("状态 ", "status ") + s;
+}
+
+function decodeFunctionMap(raw) {
+  let v;
+  try { v = Number(raw); } catch { return String(raw); }
+  if (!Number.isFinite(v)) return String(raw);
+  const on = FMAP_BITS.filter(([bit]) => (v >> bit) & 1).map(([, name]) => name);
+  const label = on.length
+    ? t("已开启: ", "Enabled: ") + on.join(t("、", ", "))
+    : t("无通讯位开启", "No comm bits set");
+  return label + t("  (原始值 ", "  (raw ") + v + ")";
+}
+
+function refreshStatus() {
+  const secured = session ? "yes" : "no";
+  document.getElementById("devStatus").textContent =
+    t("名称：", "Name: ") + (device?.name || "—") + "\n" +
+    t("SN：", "SN: ") + (sn || "—") + "\n" +
+    t("BLE：", "BLE: ") + statusBle + "\n" +
+    t("安全会话：", "Secure session: ") + secured + "\n" +
+    "Wi-Fi: " + statusWifi + "\n" +
+    t("通讯：", "Comm: ") + statusComm + "\n" +
+    "GATT: A003";
+}
+
+function setConnected(on) {
+  document.getElementById("btnDisc").disabled = !on;
+  document.getElementById("btnHs").disabled = !on;
+  document.getElementById("btnPick").disabled = on;
+  const sec = !!session;
+  ["btnWifi","btnScanWifi","btnListWifi","btnRead","btnCustom","btnMeter","btnComm","btnMb","btnRefresh"].forEach((id) => {
+    document.getElementById(id).disabled = !sec;
+  });
+  document.querySelectorAll("#quickBtns button").forEach((b) => { b.disabled = !sec; });
+}
+
+function onNotify(ev) {
+  const text = dec.decode(ev.target.value);
+  queue.push(text);
+  if (text.includes('"ct"') && session) log("[RX envelope] " + text.slice(0, 80) + "…");
+  else log("[RX] " + text);
+}
+
+function waitRaw(timeoutMs) {
+  const t0 = Date.now();
+  return new Promise((resolve, reject) => {
+    const tick = () => {
+      if (queue.length) return resolve(queue.shift());
+      if (Date.now() - t0 > timeoutMs) return reject(new Error("timeout waiting notify"));
+      setTimeout(tick, 40);
+    };
+    tick();
+  });
+}
+
+async function writeJson(obj) {
+  const text = JSON.stringify(obj);
+  log("[TX] " + (text.length > 200 ? text.slice(0, 200) + "…" : text));
+  await writeCh.writeValueWithResponse(enc.encode(text));
+}
+
+async function waitEvent(eventName, { timeoutMs = 15000, allowEncrypted = true } = {}) {
+  while (true) {
+    const raw = await waitRaw(timeoutMs);
+    let doc;
+    try { doc = JSON.parse(raw); } catch { continue; }
+    if (allowEncrypted && session && doc.nonce != null && doc.ct && doc.tag) {
+      doc = decryptEnvelope(session, doc);
+      log("[RX decrypted] " + JSON.stringify(doc));
+    }
+    if (doc.event === "secure" && doc.ok === false) return doc;
+    if (doc.event === eventName) return doc;
+  }
+}
+
+function drain() { queue.length = 0; }
+
+// Do NOT enqueue on `chain` here: connect/handshake already run inside chain.then(...).
+// Nesting rpc* onto the same chain deadlocks (waits for itself). Serialize only at button handlers.
+async function rpcPlain(obj, timeoutMs = 12000) {
+  drain();
+  await writeJson(obj);
+  return waitEvent(obj.cmd, { timeoutMs, allowEncrypted: false });
+}
+
+async function rpcSecure(obj, timeoutMs = 20000) {
+  if (!session) throw new ProtocolError("secure session not ready");
+  drain();
+  log("[TX secure plain] " + JSON.stringify(obj));
+  const env = encryptEnvelope(session, obj);
+  await writeJson(env);
+  return waitEvent(obj.cmd, { timeoutMs, allowEncrypted: true });
+}
+
+async function sendRound1(clientNonceHex, clientRound1B64) {
+  if (clientRound1B64.length <= ROUND1_CHUNK_LEN) {
+    drain();
+    await writeJson({ cmd: "ble-crypto-jpake-round1", client_nonce: clientNonceHex, client_round1: clientRound1B64 });
+  } else {
+    const parts = [];
+    for (let i = 0; i < clientRound1B64.length; i += ROUND1_CHUNK_LEN) parts.push(clientRound1B64.slice(i, i + ROUND1_CHUNK_LEN));
+    drain();
+    for (let idx = 0; idx < parts.length; idx++) {
+      await writeJson({
+        cmd: "ble-crypto-jpake-round1",
+        client_nonce: clientNonceHex,
+        part_idx: idx,
+        part_total: parts.length,
+        client_round1_part: parts[idx],
+      });
+      if (idx + 1 < parts.length) {
+        const ack = await waitEvent("ble-crypto-jpake-round1", { allowEncrypted: false });
+        if (!ack.ok) throw new ProtocolError("round1 upload: " + (ack.msg || ""));
+        if ((ack.d || {}).status !== "continue") throw new ProtocolError("unexpected round1 chunk ack");
+      }
+    }
+  }
+  const first = await waitEvent("ble-crypto-jpake-round1", { timeoutMs: 25000, allowEncrypted: false });
+  if (!first.ok) throw new ProtocolError("round1 failed: " + (first.msg || ""));
+  const data = first.d || {};
+  const deviceNonce = String(data.device_nonce || "");
+  if (!deviceNonce) throw new ProtocolError("device_nonce missing");
+  if (data.server_round1) return [deviceNonce, String(data.server_round1)];
+  if (!data.server_round1_part) throw new ProtocolError("unexpected round1 response");
+  const parts = {};
+  parts[Number(data.part_idx || 0)] = String(data.server_round1_part);
+  const total = Number(data.part_total || 0);
+  while (Object.keys(parts).length < total) {
+    await writeJson({ cmd: "ble-crypto-jpake-round1", client_nonce: clientNonceHex, fetch_next: true });
+    const chunk = await waitEvent("ble-crypto-jpake-round1", { allowEncrypted: false });
+    if (!chunk.ok) throw new ProtocolError("round1 chunk fail");
+    const d = chunk.d || {};
+    parts[Number(d.part_idx)] = String(d.server_round1_part);
+  }
+  const assembled = Array.from({ length: total }, (_, i) => parts[i]).join("");
+  return [deviceNonce, assembled];
+}
+
+async function fullHandshake(pin, ver) {
+  const pinKey = derivePinKey(pin, sn, ver);
+  const jpake = new EcJpakeClient(pinKey);
+  const clientNonce = randomClientNonce();
+  const r1 = b64encode(jpake.writeRound1());
+  const [deviceNonceHex, serverR1B64] = await sendRound1(bytesToHex(clientNonce), r1);
+  jpake.readRound1(b64decode(serverR1B64));
+  const r2 = b64encode(jpake.writeRound2());
+  drain();
+  await writeJson({ cmd: "ble-crypto-jpake-round2", client_round2: r2 });
+  const resp = await waitEvent("ble-crypto-jpake-round2", { timeoutMs: 25000, allowEncrypted: false });
+  if (!resp.ok) throw new ProtocolError("round2 failed: " + (resp.msg || ""));
+  const serverR2 = String((resp.d || {}).server_round2 || "");
+  if (!serverR2) throw new ProtocolError("server_round2 missing");
+  jpake.readRound2(b64decode(serverR2));
+  const deviceNonce = hexToBytes(deviceNonceHex);
+  const shared = jpake.deriveSharedKey();
+  const ltk = deriveLtk(shared, deviceNonce, clientNonce, sn, ver);
+  const sessionKey = deriveSessionKey(ltk, deviceNonce, clientNonce, sn, ver);
+  const bcast = deriveBroadcastKey(ltk, deviceNonce, clientNonce, sn, ver);
+  const txBase = deriveNonceBase(clientNonce, deviceNonce, "ccm-rx-nonce");
+  const rxBase = deriveNonceBase(deviceNonce, clientNonce, "ccm-tx-nonce");
+  session = new SessionState({
+    protocolVersion: ver, sn, clientNonce, deviceNonce, ltk, sessionKey,
+    txNonceBase: txBase, rxNonceBase: rxBase, broadcastKey: bcast,
+  });
+  saveLtk(sn, ver, bytesToHex(ltk), bytesToHex(bcast));
+  document.getElementById("ltkHex").value = bytesToHex(ltk);
+  showKeys({
+    ltk: bytesToHex(ltk),
+    session: bytesToHex(sessionKey),
+    broadcast: bytesToHex(bcast),
+    sn,
+    ver,
+  });
+  if (!document.getElementById("debugKeys").checked) {
+    log("secure channel OK (keys hidden — enable debug to show)", "ok");
+  } else {
+    log("secure channel OK", "ok");
+  }
+  maybeEnableAdv();
+}
+
+async function resumeFromLtk(ver, ltk) {
+  const clientNonce = randomClientNonce();
+  drain();
+  await writeJson({ cmd: "ble-crypto-session-nonce", client_nonce: bytesToHex(clientNonce) });
+  const resp = await waitEvent("ble-crypto-session-nonce", { allowEncrypted: false });
+  if (!resp.ok) throw new ProtocolError("session resume failed: " + (resp.msg || ""));
+  const deviceNonceHex = String((resp.d || {}).device_nonce || "");
+  if (!deviceNonceHex) throw new ProtocolError("device_nonce missing");
+  const deviceNonce = hexToBytes(deviceNonceHex);
+  const sessionKey = deriveSessionKey(ltk, deviceNonce, clientNonce, sn, ver);
+  const txBase = deriveNonceBase(clientNonce, deviceNonce, "ccm-rx-nonce");
+  const rxBase = deriveNonceBase(deviceNonce, clientNonce, "ccm-tx-nonce");
+  const cached = getCachedLtk(sn);
+  let bcast = null;
+  if (cached && cached.broadcast_key_hex && cached.broadcast_key_hex.length === 32) {
+    bcast = hexToBytes(cached.broadcast_key_hex);
+  }
+  session = new SessionState({
+    protocolVersion: ver, sn, clientNonce, deviceNonce, ltk, sessionKey,
+    txNonceBase: txBase, rxNonceBase: rxBase, broadcastKey: bcast,
+  });
+  document.getElementById("ltkHex").value = bytesToHex(ltk);
+  showKeys({
+    ltk: bytesToHex(ltk),
+    session: bytesToHex(sessionKey),
+    broadcast: bcast ? bytesToHex(bcast) : undefined,
+    sn,
+    ver,
+  });
+  log("session resumed from LTK", "ok");
+  maybeEnableAdv();
+}
+
+async function openSecureChannel() {
+  const pin = resolvePin();
+  log(t("PIN=", "PIN=") + pin);
+  log(t("查询 ble-crypto-ver…", "Query ble-crypto-ver…"));
+  const verResp = await rpcPlain({ cmd: "ble-crypto-ver" }, 15000);
+  if (!verResp.ok) throw new ProtocolError("ble-crypto-ver: " + (verResp.msg || ""));
+  protocolVersion = String((verResp.d || {}).ver || PROTOCOL_VERSION_FALLBACK);
+  let step = Number((verResp.d || {}).step || 0);
+  log(`ver=${protocolVersion} step=${step}`);
+  if (step === 1) {
+    await rpcPlain({ cmd: "ble-crypto-reset" });
+    const again = await rpcPlain({ cmd: "ble-crypto-ver" });
+    step = Number((again.d || {}).step || 0);
+  }
+  if (step === 0) {
+    if (!/^\d{8}$/.test(pin)) throw new ProtocolError("PIN must be exactly 8 digits");
+    await fullHandshake(pin, protocolVersion);
+  } else if (step === 2) {
+    const cached = getCachedLtk(sn);
+    if (!cached) {
+      throw new ProtocolError(t(
+        "设备 step=2（已有 LTK），但本页没有可用 LTK。请在 LTK 框填入 32 位 hex 后点「安全握手」；或长按复位做恢复出厂清掉 LTK，再用 PIN 重新完整握手。",
+        "Device step=2 (LTK on meter) but no LTK here. Paste 32-hex LTK and handshake, or long-press factory reset to clear LTK then use PIN."
+      ));
+    }
+    document.getElementById("ltkHex").value = cached.ltk_hex;
+    await resumeFromLtk(cached.protocol_version || protocolVersion, hexToBytes(cached.ltk_hex));
+  } else if (step === 3) {
+    if (session) {
+      log(t("已经建链（step=3），无需再点「安全握手」", "Already secured (step=3); no need to handshake again"), "ok");
+      return;
+    }
+    throw new ProtocolError(t(
+      "设备本连接已是 step=3（会话在电表内存里），但页面没有密钥。请点「断开」再「选择设备并连接」，不要在已建链后再点「安全握手」。",
+      "Device is already step=3 on this GATT link, but this page lost the session keys. Disconnect, then connect again. Do not handshake twice on the same link."
+    ));
+  } else {
+    throw new ProtocolError("unsupported step " + step);
+  }
+  statusBle = t("已连接，已建链", "Connected, secured");
+  setConnected(true);
+  refreshStatus();
+}
+
+function onGattDisconnected() {
+  session = null;
+  clearKeysPanel();
+  writeCh = null;
+  readCh = null;
+  notifyCh = null;
+  notifyBound = false;
+  statusBle = t("已断开", "Disconnected");
+  setConnected(false);
+  refreshStatus();
+  log("GATT disconnected", "bad");
+  if (holdDisconnect) {
+    holdDisconnect = false;
+    return;
+  }
+  if (linkBusy) {
+    log(t("握手进行中断开，暂不自动重连", "Drop during handshake — skip auto-reconnect"), "bad");
+    return;
+  }
+  if (wantLink && document.getElementById("autoRe").checked) {
+    statusBle = t("已断开，正在重连…", "Disconnected, reconnecting…");
+    refreshStatus();
+    reconnectLoop();
+  }
+}
+
+async function attachGatt({ doHandshake = true } = {}) {
+  if (!device) throw new Error("no device");
+  if (device.gatt.connected) {
+    try { device.gatt.disconnect(); } catch (_) {}
+    await sleep(400);
+  }
+  server = await device.gatt.connect();
+  await sleep(400);
+  const svc = await server.getPrimaryService(UUID.service);
+  writeCh = await svc.getCharacteristic(UUID.write);
+  readCh = await svc.getCharacteristic(UUID.read);
+  notifyCh = await svc.getCharacteristic(UUID.notify);
+  if (notifyBound) {
+    try { notifyCh.removeEventListener("characteristicvaluechanged", onNotify); } catch (_) {}
+  }
+  notifyCh.addEventListener("characteristicvaluechanged", onNotify);
+  notifyBound = true;
+  await notifyCh.startNotifications();
+  await sleep(300);
+  drain();
+  sn = inferSn(document.getElementById("sn").value, device.name);
+  document.getElementById("sn").value = sn;
+  const cached = getCachedLtk(sn);
+  if (cached && cached.ltk_hex && !document.getElementById("ltkHex").value.trim()) {
+    document.getElementById("ltkHex").value = cached.ltk_hex;
+  }
+  statusBle = t("已连接，未建链", "Connected, not secured");
+  session = null;
+  setConnected(true);
+  refreshStatus();
+  log("connected + notify C315", "ok");
+  if (doHandshake && document.getElementById("autoHs").checked) {
+    log(t("开始安全握手…", "Starting secure handshake…"));
+    await openSecureChannel();
+    await refreshComm();
+    await readMeter();
+  }
+}
+
+async function reconnectLoop() {
+  if (reconnectBusy || linkBusy) return;
+  reconnectBusy = true;
+  try {
+    for (let i = 1; i <= 12; i++) {
+      if (!wantLink || !document.getElementById("autoRe").checked) return;
+      log(t("自动重连 ", "Reconnect ") + i + "/12 …");
+      await sleep(i === 1 ? 4000 : 2500);
+      try {
+        linkBusy = true;
+        await attachGatt({ doHandshake: true });
+        log(t("自动重连成功", "Reconnect OK"), "ok");
+        return;
+      } catch (e) {
+        log(String(e), "bad");
+        writeCh = null;
+        session = null;
+        statusBle = t("已连接，未建链", "Connected, not secured");
+        if (device?.gatt?.connected) refreshStatus();
+        else {
+          statusBle = t("未连接", "Disconnected");
+          refreshStatus();
+        }
+      } finally {
+        linkBusy = false;
+      }
+    }
+    log(t("自动重连失败，请再点选择设备", "Auto-reconnect failed; pick device again"), "bad");
+    statusBle = t("未连接", "Disconnected");
+    refreshStatus();
+  } finally {
+    reconnectBusy = false;
+  }
+}
+
+function buildRequestOptions() {
+  // Windows Chrome often hides meters when filtering by namePrefix alone
+  // (advertised Complete Local Name is not always visible to the filter).
+  // acceptAllDevices shows every nearby BLE peripheral; then we connect GATT A003.
+  if (document.getElementById("showAllBle").checked) {
+    return { acceptAllDevices: true, optionalServices: [UUID.service] };
+  }
+  return {
+    filters: [
+      { namePrefix: "SDM" },
+      { namePrefix: "SPM" },
+      { namePrefix: "SXM" },
+      { namePrefix: "SRS" },
+      { namePrefix: "Pulse" },
+    ],
+    optionalServices: [UUID.service],
+  };
+}
+
+async function connect() {
+  if (!window.isSecureContext) {
+    alert(t(
+      "当前不是安全上下文（须用 http://127.0.0.1 或 HTTPS，不要用 file://）。\n在 tools/ble-secured 目录执行：py -3 -m http.server 8765\n再打开 http://127.0.0.1:8765/web-ble-secured-console.html",
+      "Not a secure context (use http://127.0.0.1 or HTTPS, not file://).\nIn tools/ble-secured/: py -3 -m http.server 8765\nThen open http://127.0.0.1:8765/web-ble-secured-console.html"
+    ));
+    return;
+  }
+  if (!navigator.bluetooth) {
+    alert(t(
+      "当前浏览器无 Web Bluetooth。请用 Chrome 或 Edge（不要用 Firefox / Safari）。",
+      "Web Bluetooth unavailable. Use Chrome or Edge (not Firefox / Safari)."
+    ));
+    return;
+  }
+  try {
+    if (navigator.bluetooth.getAvailability) {
+      const avail = await navigator.bluetooth.getAvailability();
+      if (avail === false) {
+        alert(t(
+          "系统蓝牙不可用。请打开笔记本蓝牙，并确认 Windows「蓝牙」开关已开。",
+          "Bluetooth adapter unavailable. Turn on PC Bluetooth in Windows settings."
+        ));
+        return;
+      }
+    }
+    selfCheckPinKey();
+    log("crypto self-check PBKDF2 OK", "ok");
+    const opts = buildRequestOptions();
+    log(t(
+      "正在弹出系统选设备对话框…（若列表为空：勾选「显示全部 BLE」、靠近电表、确认未被其它 App 占用）",
+      "Opening system device picker… (if empty: enable “show all BLE”, move closer, ensure no other App holds the GATT)"
+    ));
+    device = await navigator.bluetooth.requestDevice(opts);
+    log(t("已选：", "Picked: ") + (device.name || "(no name)") + " id=" + device.id);
+    wantLink = true;
+    reconnectBusy = false;
+    if (device._securedDiscBound !== true) {
+      device.addEventListener("gattserverdisconnected", onGattDisconnected);
+      device._securedDiscBound = true;
+    }
+    linkBusy = true;
+    try {
+      await attachGatt({ doHandshake: true });
+    } finally {
+      linkBusy = false;
+    }
+  } catch (e) {
+    const msg = String(e && e.message ? e.message : e);
+    if (/User cancelled|canceled|Chooser/i.test(msg) || e.name === "NotFoundError") {
+      log(t(
+        "未选中设备。列表空常见原因：①未用 127.0.0.1 打开 ②名字过滤太严（请勾选「显示全部 BLE」）③电表已被 Python GUI / 手机连着（连着就不广播）④蓝牙关了",
+        "No device chosen. Empty list often means: ①not on 127.0.0.1 ②name filter too strict (enable “show all BLE”) ③meter already connected elsewhere (stops advertising) ④Bluetooth off"
+      ), "bad");
+      statusBle = t("未连接", "Disconnected");
+      setConnected(false);
+    } else if (/step=2|LTK/i.test(msg)) {
+      log(msg, "bad");
+      statusBle = t("已连接，未建链", "Connected, not secured");
+      setConnected(!!device?.gatt?.connected);
+      alert(msg);
+    } else {
+      log(msg, "bad");
+      if (device?.gatt?.connected) {
+        statusBle = t("已连接，未建链", "Connected, not secured");
+        setConnected(true);
+      } else {
+        statusBle = t("未连接", "Disconnected");
+        setConnected(false);
+      }
+    }
+    refreshStatus();
+  } finally {
+    linkBusy = false;
+  }
+}
+
+async function disconnect() {
+  wantLink = false;
+  holdDisconnect = true;
+  linkBusy = false;
+  try { if (device?.gatt?.connected) device.gatt.disconnect(); } catch (_) {}
+  session = null;
+  clearKeysPanel();
+  setConnected(false);
+  statusBle = t("未连接", "Disconnected");
+  refreshStatus();
+}
+
+function parseWifiList(resp) {
+  const raw = String((resp.d || {}).list || "");
+  return raw.split(",").filter(Boolean).map((p) => {
+    if (p.includes("|")) {
+      const i = p.lastIndexOf("|");
+      return [p.slice(0, i), parseInt(p.slice(i + 1), 10) || 0];
+    }
+    return [p, 0];
+  });
+}
+
+function fillWifi(items) {
+  const tb = document.getElementById("wifiRows");
+  tb.innerHTML = "";
+  for (const [ssid, rssi] of items) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${ssid}</td><td>${rssi}</td>`;
+    tr.onclick = () => { document.getElementById("ssid").value = ssid; };
+    tb.appendChild(tr);
+  }
+}
+
+async function readMeter() {
+  const r = await rpcSecure({ cmd: "read" });
+  if (!r.ok) { log(r, "bad"); return; }
+  const raw = await readCh.readValue();
+  let text = dec.decode(raw.buffer ? raw.buffer : raw);
+  let doc = JSON.parse(text);
+  if (doc.nonce != null && doc.ct && doc.tag) {
+    doc = decryptEnvelope(session, doc);
+  }
+  log("[READ C314] " + JSON.stringify(doc));
+  const tb = document.getElementById("meterRows");
+  tb.innerHTML = "";
+  for (const [k, v] of Object.entries(doc)) {
+    if (typeof v === "object") continue;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${k}</td><td>${v}</td>`;
+    tb.appendChild(tr);
+  }
+  const ip = String(doc.IP || "");
+  const rssi = doc.RSSI != null ? doc.RSSI : "";
+  const sep = lang === "en" ? "; " : "；";
+  statusWifi = wifiIpStatus(ip) + sep + "RSSI=" + rssi + " dBm";
+  refreshStatus();
+}
+
+async function refreshComm() {
+  try {
+    const fmap = await rpcSecure({ cmd: "getFunctionMap" });
+    const model = await rpcSecure({ cmd: "model", type: 1 });
+    const mqtt = await rpcSecure({ cmd: "mqttdata" });
+    const udp = await rpcSecure({ cmd: "udpdata" });
+    const fm = (fmap.d || {}).functionMap;
+    statusComm = decodeFunctionMap(fm);
+    document.getElementById("commBox").textContent = JSON.stringify({
+      functionMap: fm,
+      functionMapDecoded: statusComm,
+      model: model.d || {},
+      mqtt: mqtt.d || {},
+      udp: udp.d || {},
+    }, null, 2);
+    refreshStatus();
+  } catch (e) {
+    log(String(e), "bad");
+  }
+}
+
+async function refreshLinkSnapshot() {
+  if (!session) return;
+  await refreshComm();
+  await readMeter();
+}
+
+function buildQuickButtons() {
+  const qb = document.getElementById("quickBtns");
+  qb.innerHTML = "";
+  for (const [zh, en, payload] of QUICK) {
+    const b = document.createElement("button");
+    b.textContent = t(zh, en);
+    b.disabled = !session;
+    b.onclick = async () => {
+      if (payload.cmd === "reset" && !confirm(t("恢复出厂设置将清空配置并清除 LTK，确定？", "Factory reset clears config and LTK. Continue?"))) return;
+      if (payload.cmd === "startota" && !confirm(t("启动 OTA，确定？", "Start OTA?"))) return;
+      try {
+        const long = ["checkota", "startota", "otaprogress", "restart", "reset"].includes(payload.cmd);
+        const r = await rpcSecure(payload, long ? 25000 : 15000);
+        log(r, r.ok ? "ok" : "bad");
+        if (["model", "mqttdata", "getFunctionMap", "udpdata"].includes(payload.cmd)) await refreshComm();
+        if (["restart", "reset"].includes(payload.cmd) && r.ok) {
+          log(t("设备将重启；若勾选自动重连将恢复会话", "Device will reboot; auto-reconnect will resume session"));
+        }
+      } catch (e) { log(String(e), "bad"); }
+    };
+    qb.appendChild(b);
+  }
+}
+
+function applyLang() {
+  document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+  document.getElementById("btnZh").classList.toggle("on", lang === "zh");
+  document.getElementById("btnEn").classList.toggle("on", lang === "en");
+  document.getElementById("uiTitle").textContent = t("电表加密 BLE 体验台（A003）", "Meter Secured BLE Console (A003)");
+  document.getElementById("uiSubtitle").textContent = t(
+    "Lite/Pro · 完整 EC J-PAKE + AES-CCM · 与 Windows GUI 同协议",
+    "Lite/Pro · full EC J-PAKE + AES-CCM · same protocol as Windows GUI"
+  );
+  document.getElementById("banner").textContent = t(
+    "服务 0xA003 / 写 C313 / 读 C314 / 通知 C315。勿与明文 A002 混用。" + (window.__OFFLINE_BUNDLE__ ? "密码学库已内置（无需 CDN）。" : "密码学库在 tools/ble-secured/vendor（无需 CDN）。须用本地 HTTP 打开（file:// 下浏览器不允许加载 ES 模块）。") + "配网码为二维码下方 11 位（或 8 位 PIN）。",
+    "Service 0xA003 / write C313 / read C314 / notify C315. Do not mix with plaintext A002. " + (window.__OFFLINE_BUNDLE__ ? "Crypto is built in (no CDN). " : "Crypto is offline under tools/ble-secured/vendor (no CDN). Serve over local HTTP (browsers block ES-module imports on file://). ") + "Pairing code: the 11 digits under the QR code, or the 8-digit PIN."
+  );
+  document.getElementById("hConn").textContent = t("1. 连接与安全握手", "1. Connect & secure handshake");
+  document.getElementById("hWifi").textContent = t("2. Wi-Fi 配网（加密）", "2. Wi-Fi provisioning (encrypted)");
+  document.getElementById("hQuick").textContent = t("3. 一键命令（加密）", "3. Quick commands (encrypted)");
+  document.getElementById("hCustom").textContent = t("4. 自定义业务 JSON", "4. Custom business JSON");
+  document.getElementById("lblPin").textContent = t("配网码（二维码下方 11 位，或直接填 8 位 PIN）", "Pairing code (11 digits under QR, or 8-digit PIN)");
+  const hp = document.getElementById("hintPin"); if (hp) hp.textContent = t("程序会校验位并还原为 8 位 PIN 再握手；也可直接输入 8 位 PIN。", "Checksummed 11-digit code is decoded to 8-digit PIN; or enter PIN directly.");
+  document.getElementById("lblSn").textContent = t("SN（可空=从广播名推断）", "SN (empty = infer from name)");
+  document.getElementById("lblShowAll").textContent = t(
+    "显示附近全部 BLE（Windows 上名字过滤常扫不到，建议勾选）",
+    "Show all nearby BLE (recommended on Windows — name filters often miss meters)"
+  );
+  document.getElementById("lblAutoHs").textContent = t("连接后自动安全握手", "Auto handshake after connect");
+  document.getElementById("lblAutoRe").textContent = t(
+    "断开后自动重连 GATT（默认关；连不稳时请先保持关闭）",
+    "Auto-reconnect GATT (off by default; leave off while debugging drops)"
+  );
+  document.getElementById("lblLtk").textContent = t(
+    "LTK（可选，32 hex；设备 step=2 时填写以恢复会话）",
+    "LTK (optional, 32 hex; fill to resume when device step=2)"
+  );
+  document.getElementById("hintLtk").textContent = t(
+    "若设备已有 LTK（step=2）而本页没有：在上方填入已知 LTK，或长按复位做恢复出厂后再用 PIN 完整握手。",
+    "If meter has LTK (step=2) but this page does not: paste known LTK, or long-press factory reset then handshake with PIN."
+  );
+  document.getElementById("lblDebug").textContent = t("调试：显示密钥材料（页面 + 日志）", "Debug: show key material (panel + log)");
+  document.getElementById("lblKeysPanel").textContent = t("调试密钥（勿截图外传）", "Debug keys (do not share screenshots)");
+  document.getElementById("btnPick").textContent = t("选择设备并连接", "Pick device & connect");
+  document.getElementById("btnHs").textContent = t("安全握手", "Secure handshake");
+  document.getElementById("btnDisc").textContent = t("断开", "Disconnect");
+  document.getElementById("btnRefresh").textContent = t("刷新状态", "Refresh status");
+  document.getElementById("lblWifiPass").textContent = t("Wi-Fi 密码（不是 PIN）", "Wi-Fi password (not PIN)");
+  document.getElementById("btnWifi").textContent = t("发送 Wi-Fi", "Send Wi-Fi");
+  document.getElementById("btnScanWifi").textContent = t("扫描热点", "Scan APs");
+  document.getElementById("btnListWifi").textContent = t("获取列表", "Get list");
+  document.getElementById("btnRead").textContent = t("读 IP / 电参", "Read IP / meter");
+  document.getElementById("hintWifi").textContent = t(
+    "须先建链。业务经加密信封写 C313；读 C314 自动解密。点击列表行填入 SSID。",
+    "Secure first. Business writes encrypted C313; C314 decrypts automatically. Click a row to fill SSID."
+  );
+  document.getElementById("lblMb").textContent = t("写 Modbus RTU（485）", "Write Modbus RTU (485)");
+  const lp = document.getElementById("lblMbParity"); if (lp) lp.textContent = t("校验/停止位", "Parity/Stop");
+  document.getElementById("lblMbAddr").textContent = t("地址", "Addr");
+  document.getElementById("lblMbBaud").textContent = t("波特率", "Baud");
+  document.getElementById("btnMb").textContent = t("下发 modbus", "Send modbus");
+  document.getElementById("hintCustom").textContent = t("输入明文业务对象，页面自动加密封装发送。", "Enter plaintext business JSON; page encrypts the envelope.");
+  document.getElementById("btnCustom").textContent = t("发送（加密）", "Send (encrypted)");
+  document.getElementById("tabLog").textContent = t("日志", "Log");
+  document.getElementById("tabAdv").textContent = t("业务广播", "Broadcast");
+  document.getElementById("tabMeter").textContent = t("电参", "Meter");
+  document.getElementById("tabComm").textContent = t("通讯", "Comm");
+  document.getElementById("tabHelp").textContent = t("速查", "Help");
+  document.getElementById("hintAdv").textContent = t(
+    "握手后可用 broadcast_key 解密厂商长包（约 200ms）。网页依赖 watchAdvertisements；多数 Windows/手机浏览器不支持，请用 Windows GUI。",
+    "After handshake, decrypt long manufacturer adv (~200ms). Needs watchAdvertisements; most Windows/phone browsers lack it — use Windows GUI."
+  );
+  updateAdvCapabilityHint();
+  document.getElementById("btnAdvStart").textContent = t("开始监听广播", "Start adv watch");
+  document.getElementById("btnAdvStop").textContent = t("停止", "Stop");
+  document.getElementById("btnClear").textContent = t("清空日志", "Clear log");
+  document.getElementById("btnClear").textContent = t("清空", "Clear");
+  document.getElementById("btnMeter").textContent = t("刷新电参", "Refresh meter");
+  document.getElementById("btnComm").textContent = t("刷新通讯", "Refresh comm");
+  document.getElementById("helpFilter").placeholder = t("过滤：wifi、jpake、replay、MI…", "Filter: wifi, jpake, replay, MI…");
+  document.getElementById("help").textContent = currentHelp();
+  const origin = location.origin + location.pathname;
+  const secure = window.isSecureContext;
+  const bleOk = !!navigator.bluetooth;
+  document.getElementById("compat").textContent = bleOk
+    ? t("Web Bluetooth 可用 · ", "Web Bluetooth available · ") + origin
+    : t("当前浏览器无 Web Bluetooth · ", "No Web Bluetooth · ") + origin;
+  const oh = document.getElementById("originHint");
+  if (!secure || (location.protocol === "file:" && !window.__OFFLINE_BUNDLE__)) {
+    oh.textContent = t(
+      "⚠ 必须用本地 HTTP 打开，否则选不到设备：在 tools/ble-secured 目录运行  py -3 -m http.server 8765  ，再用 Chrome 打开 http://127.0.0.1:8765/web-ble-secured-console.html",
+      "⚠ Serve over local HTTP or the picker stays empty: in tools/ble-secured/ run  py -3 -m http.server 8765  then open http://127.0.0.1:8765/web-ble-secured-console.html in Chrome"
+    );
+  } else if (!bleOk) {
+    oh.textContent = t("⚠ 请换 Chrome / Edge。", "⚠ Use Chrome / Edge.");
+  } else {
+    oh.textContent = t(
+      "提示：同一时间只连一个客户端。step=2 连不上时：填写 LTK，或长按复位清 LTK 后用 PIN 重配。勾选「调试」可在下方查看密钥。",
+      "Tip: one client at a time. If step=2 blocks you: paste LTK, or long-press factory reset then use PIN. Enable Debug to show keys below."
+    );
+  }
+  if (statusWifi === "—" || statusWifi === "尚未查询" || statusWifi === "Not queried") {
+    statusWifi = t("尚未查询", "Not queried");
+  }
+  if (statusComm === "—" || statusComm === "尚未查询" || statusComm === "Not queried") {
+    statusComm = t("尚未查询", "Not queried");
+  }
+  buildQuickButtons();
+  refreshStatus();
+}
+
+document.getElementById("debugKeys").onchange = () => {
+  const panel = document.getElementById("keysPanel");
+  if (!document.getElementById("debugKeys").checked) {
+    panel.hidden = true;
+  } else if (session) {
+    showKeys({
+      ltk: bytesToHex(session.ltk),
+      session: bytesToHex(session.sessionKey),
+      broadcast: session.broadcastKey ? bytesToHex(session.broadcastKey) : undefined,
+      sn: session.sn,
+      ver: session.protocolVersion,
+    });
+  } else {
+    panel.hidden = false;
+  }
+};
+
+
+function browserSupportsAdvWatch() {
+  return !!(typeof BluetoothDevice !== "undefined"
+    && BluetoothDevice.prototype
+    && typeof BluetoothDevice.prototype.watchAdvertisements === "function")
+    || !!(device && typeof device.watchAdvertisements === "function");
+}
+function updateAdvCapabilityHint() {
+  const el = document.getElementById("advCapHint");
+  if (!el) return;
+  if (browserSupportsAdvWatch()) {
+    el.textContent = t(
+      "本浏览器声明支持 watchAdvertisements。需已建链且有 broadcast_key。",
+      "This browser exposes watchAdvertisements. Need secured session + broadcast_key."
+    );
+    el.style.color = "var(--ok)";
+  } else {
+    el.textContent = t(
+      "本浏览器不支持 watchAdvertisements（Windows Chrome 常见）。网页侧无法听业务广播；请运行 ble_secured_gui.py 的「业务广播」页。配网 / 读电参不受影响。",
+      "No watchAdvertisements here (common on Windows Chrome). Use ble_secured_gui.py Broadcast tab. Provisioning / meter read still work."
+    );
+    el.style.color = "var(--warn)";
+  }
+}
+
+let advWatching = false;
+function paintAdv(fields, meta) {
+  document.getElementById("advPhase").textContent = fields.phase || "—";
+  document.getElementById("advV").textContent = fields.V != null ? fields.V : "—";
+  document.getElementById("advI").textContent = fields.I != null ? fields.I : "—";
+  document.getElementById("advP").textContent = fields.P != null ? fields.P : "—";
+  document.getElementById("advFE").textContent = fields.FE != null ? fields.FE : "—";
+  document.getElementById("advRE").textContent = fields.RE != null ? fields.RE : "—";
+  const line = (meta || "") + " " + JSON.stringify(fields);
+  const el = document.getElementById("advLive");
+  el.textContent = line + "\n" + el.textContent.split("\n").slice(0, 40).join("\n");
+}
+function maybeEnableAdv() {
+  updateAdvCapabilityHint();
+  const ok = !!(session && session.broadcastKey && device && browserSupportsAdvWatch());
+  document.getElementById("btnAdvStart").disabled = !ok;
+  document.getElementById("btnAdvStop").disabled = !advWatching;
+}
+async function startAdvWatch() {
+  if (!device || !session?.broadcastKey) {
+    alert(t("需要已建链且具备 broadcast_key（完整 J-PAKE 后才有）", "Need secured session with broadcast_key (after full J-PAKE)"));
+    return;
+  }
+  if (!browserSupportsAdvWatch()) {
+    updateAdvCapabilityHint();
+    alert(t(
+      "当前浏览器不支持 watchAdvertisements，网页无法听业务广播。请用：py -3 ble_secured_gui.py →「业务广播」。配网功能正常。",
+      "watchAdvertisements unsupported. Use ble_secured_gui.py → Broadcast tab. Provisioning still works."
+    ));
+    return;
+  }
+  try {
+    await device.watchAdvertisements();
+    if (!device._advBound) {
+      device.addEventListener("advertisementreceived", onAdvertisement);
+      device._advBound = true;
+    }
+    advWatching = true;
+    maybeEnableAdv();
+    log(t("已开始监听业务广播", "Listening for business advertisements"), "ok");
+  } catch (e) {
+    log(String(e), "bad");
+  }
+}
+function stopAdvWatch() {
+  advWatching = false;
+  maybeEnableAdv();
+  log(t("已停止监听广播", "Stopped advertisement watch"));
+}
+function onAdvertisement(ev) {
+  if (!advWatching || !session?.broadcastKey) return;
+  try {
+    let raw = null;
+    if (ev.manufacturerData) {
+      const md = ev.manufacturerData.get(ADV_COMPANY_ID) || [...ev.manufacturerData.values()][0];
+      if (md) raw = new Uint8Array(md.buffer ? md.buffer : md);
+    }
+    const blob = normalizeAdvManufacturer(raw);
+    if (!blob) return;
+    const { counter, ctrl, plain } = decryptLongManufacturer(blob, session.broadcastKey);
+    const fields = parseLongAdvFields(ctrl, plain);
+    fields.counter = counter;
+    paintAdv(fields, new Date().toLocaleTimeString());
+  } catch (e) {
+    /* ignore decrypt fails from other devices */
+  }
+}
+document.getElementById("btnAdvStart").onclick = () => startAdvWatch();
+document.getElementById("btnAdvStop").onclick = () => stopAdvWatch();
+
+document.getElementById("btnPick").onclick = () => { chain = chain.then(connect, connect); };
+document.getElementById("btnDisc").onclick = disconnect;
+document.getElementById("btnHs").onclick = () => {
+  chain = chain.then(async () => {
+    linkBusy = true;
+    try {
+      await openSecureChannel();
+      await refreshComm();
+      await readMeter();
+    } catch (e) {
+      log(String(e), "bad");
+      statusBle = t("已连接，未建链", "Connected, not secured");
+      refreshStatus();
+      alert(String(e && e.message ? e.message : e));
+    } finally {
+      linkBusy = false;
+    }
+  });
+};
+document.getElementById("btnRefresh").onclick = () => chain.then(refreshLinkSnapshot);
+document.getElementById("btnWifi").onclick = () => {
+  chain = chain.then(async () => {
+    const ssid = document.getElementById("ssid").value.trim();
+    if (!ssid) return alert(t("请输入 Wi-Fi SSID", "Enter Wi-Fi SSID"));
+    const r = await rpcSecure({ cmd: "wifi", ssid, pass: document.getElementById("wifiPass").value }, 30000);
+    log(r, r.ok ? "ok" : "bad");
+    if (r.ok) {
+      log(t("已接受 Wi-Fi，请读 IP 确认 IPv4（成功后 LTK 才落盘）",
+            "Wi-Fi accepted; read IP for IPv4 (LTK persists after STA OK)"));
+    }
+  });
+};
+document.getElementById("btnScanWifi").onclick = () => chain.then(async () => log(await rpcSecure({ cmd: "wifiscan" })));
+document.getElementById("btnListWifi").onclick = () => chain.then(async () => {
+  const r = await rpcSecure({ cmd: "getwifilist" });
+  if (r.ok) fillWifi(parseWifiList(r));
+  log(r, r.ok ? "ok" : "bad");
+});
+document.getElementById("btnRead").onclick = () => chain.then(readMeter);
+document.getElementById("btnMeter").onclick = () => chain.then(readMeter);
+document.getElementById("btnComm").onclick = () => chain.then(refreshComm);
+document.getElementById("btnMb").onclick = () => chain.then(async () => {
+  const baud = parseInt(document.getElementById("mbBaud").value.trim(), 10);
+  if (!Number.isFinite(baud)) return alert(t("波特率必须是数字", "Baud must be a number"));
+  const address = parseInt(document.getElementById("mbAddr").value, 10) || 1;
+  const parityStop = parseInt(document.getElementById("mbParity").value, 10) || 0;
+  const r = await rpcSecure({ cmd: "modbus", baud, parityStop, address });
+  log(r, r.ok ? "ok" : "bad");
+});
+document.getElementById("btnCustom").onclick = () => chain.then(async () => {
+  try {
+    const obj = JSON.parse(document.getElementById("custom").value);
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) throw new Error(t("必须是 JSON 对象", "Must be a JSON object"));
+    const r = await rpcSecure(obj);
+    log(r, r.ok ? "ok" : "bad");
+    if (obj.cmd === "getwifilist" && r.ok) fillWifi(parseWifiList(r));
+    if (obj.cmd === "model" || obj.cmd === "mqttdata" || obj.cmd === "getFunctionMap") await refreshComm();
+  } catch (e) { log(String(e), "bad"); }
+});
+document.getElementById("btnClear").onclick = () => { document.getElementById("log").innerHTML = ""; };
+document.getElementById("btnZh").onclick = () => { lang = "zh"; localStorage.setItem("bleSecuredLang", lang); applyLang(); };
+document.getElementById("btnEn").onclick = () => { lang = "en"; localStorage.setItem("bleSecuredLang", lang); applyLang(); };
+document.getElementById("helpFilter").oninput = (e) => {
+  const q = e.target.value.toLowerCase();
+  const body = currentHelp();
+  document.getElementById("help").textContent = q
+    ? body.split("\n").filter((l) => l.toLowerCase().includes(q)).join("\n") || "(no match)"
+    : body;
+};
+document.querySelectorAll(".tabs button").forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach((b) => b.classList.remove("on"));
+    btn.classList.add("on");
+    ["log", "adv", "meter", "comm", "help"].forEach((p) => {
+      document.getElementById("pane-" + p).hidden = btn.dataset.pane !== p;
+    });
+  };
+});
+
+setConnected(false);
+updateAdvCapabilityHint();
+applyLang();
+  </script>
+</body>
+</html>

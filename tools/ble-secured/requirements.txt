@@ -1,0 +1,5 @@
+# Windows GUI + BLE + crypto (Lite/Pro secured channel)
+PyQt6>=6.6,<7
+bleak>=0.22,<1
+cryptography>=42,<46
+ecdsa>=0.19,<1

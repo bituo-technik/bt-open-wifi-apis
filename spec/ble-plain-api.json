@@ -1,0 +1,121 @@
+{
+  "id": "meter-ble-plain-json",
+  "title": "Energy meter plaintext BLE transport (service A002)",
+  "channel": "ble-plain",
+  "doc": {
+    "zh-CN": "docs/ble-plaintext/ble-plaintext-api.zh-CN.md",
+    "en": "docs/ble-plaintext/ble-plaintext-api.en.md"
+  },
+  "business": "spec/ble-business-commands.json",
+  "encoding": "utf-8-json",
+  "factoryBlePassword": "1234",
+  "mtuMax": 512,
+  "gatt": {
+    "service": "0000A002-0000-1000-8000-00805F9B34FB",
+    "write": "0000C303-0000-1000-8000-00805F9B34FB",
+    "read": "0000C304-0000-1000-8000-00805F9B34FB",
+    "notify": "0000C305-0000-1000-8000-00805F9B34FB"
+  },
+  "namePrefixes": [
+    "SDM",
+    "SPM",
+    "SXM"
+  ],
+  "advertisedName": "<model>-<serial>",
+  "flow": [
+    "scan by name",
+    "connect",
+    "enable notify on notify characteristic",
+    "write cmd=pass with pas and continue=true",
+    "wait notify event=pass ok=true",
+    "write business JSON without pas",
+    "match notify by event",
+    "optional GATT read for snapshot"
+  ],
+  "request": {
+    "cmd": "required string",
+    "pas": "required only on cmd=pass",
+    "auth": "optional phone binding",
+    "continue": "boolean, recommended true on pass"
+  },
+  "response": {
+    "ok": "boolean",
+    "msg": "string english",
+    "event": "usually equals cmd; unlock fail may be pas",
+    "code": "integer only on failure, BLE 1000-range",
+    "d": "object only when query returns data"
+  },
+  "errors": [
+    {
+      "code": 1000,
+      "msg": "auth error"
+    },
+    {
+      "code": 1001,
+      "msg": "not authenticated"
+    },
+    {
+      "code": 1002,
+      "msg": "Please unlock"
+    },
+    {
+      "code": 1003,
+      "msg": "Password Error"
+    },
+    {
+      "code": 1004,
+      "msg": "No cmd"
+    },
+    {
+      "code": 1005,
+      "msg": "No data received"
+    },
+    {
+      "code": 1026,
+      "msg": "Old Password Error"
+    },
+    {
+      "code": 1050,
+      "msg": "payload too large"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "pass",
+      "purpose": "unlock BLE session",
+      "fields": {
+        "pas": "string required",
+        "continue": "bool recommended true",
+        "newpas": "string optional <=16",
+        "auth": "string optional <=40"
+      },
+      "successMsg": "Password Correct"
+    },
+    {
+      "cmd": "blepassword",
+      "fields": {
+        "old": "string",
+        "new": "string <=16"
+      },
+      "successMsg": "Password yes"
+    },
+    {
+      "cmd": "resetauth",
+      "purpose": "clear phone binding"
+    },
+    {
+      "cmd": "read",
+      "fields": {
+        "continue": "bool, send true"
+      },
+      "successMsg": "ready"
+    }
+  ],
+  "matchRule": "(resp.event == cmd) or (resp.event == 'pas'); success = resp.ok == true; event 'pas' means not unlocked",
+  "doNot": [
+    "use encrypted service 0000A003-0000-1000-8000-00805F9B34FB",
+    "send cipher envelope nonce/ct/tag",
+    "use legacy text blepassword= or ssid><pass in customer apps",
+    "assume 5GHz Wi-Fi"
+  ]
+}
