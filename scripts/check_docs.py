@@ -107,5 +107,61 @@ for f in (ROOT / "docs").rglob("*.md"):
         for m in re.finditer(pat, t):
             bad(f"{f.relative_to(ROOT)} placeholder {m.group(0)}")
 
+# 5. every spec/*.json parses, points at existing docs, and has no CRLF line endings
+for sp in sorted((ROOT / "spec").glob("*.json")):
+    raw = sp.read_bytes()
+    if b"\r\n" in raw:
+        bad(f"{sp.relative_to(ROOT)} has CRLF line endings")
+    try:
+        js = json.loads(raw.decode("utf-8"))
+    except ValueError as e:
+        bad(f"{sp.relative_to(ROOT)} invalid JSON: {e}")
+        continue
+    d = js.get("doc") if isinstance(js, dict) else None
+    for lang, rel in (d or {}).items():
+        if not (ROOT / rel).exists():
+            bad(f"{sp.relative_to(ROOT)} doc[{lang}] missing: {rel}")
+
+# 6. Modbus map in spec == tables in docs (every address has a row; control registers present)
+mb = json.loads((ROOT / "spec/modbus-tcp-map.json").read_text(encoding="utf-8"))
+mb_addrs = {r["address"] for r in mb["identification"]}
+for kind, rs in mb["measurements"].items():
+    mb_addrs |= {r["address"] for r in rs}
+mb_addrs |= {c["address"] for c in mb["controls"]}
+for rel in mb["doc"].values():
+    t = (ROOT / rel).read_text(encoding="utf-8")
+    found = {int(x) for x in re.findall(r"^\|\s*(\d{3,5})\s*\|", t, re.M)}
+    if mb_addrs - found:
+        bad(f"{rel}: addresses in spec but no table row: {sorted(mb_addrs - found)}")
+    if found - mb_addrs:
+        bad(f"{rel}: table rows not in spec: {sorted(found - mb_addrs)}")
+    for r in mb["measurements"]["three-phase"]:
+        if ("| %d | `%s` |" % (r["address"], r["hex"])) not in t:
+            bad(f"{rel}: hex address mismatch for {r['address']}")
+
+# 7. error code spec subcodes appear in both language docs; mDNS naming regex fits the documented examples
+ec = json.loads((ROOT / "spec/error-codes.json").read_text(encoding="utf-8"))
+for rel in ec["doc"].values():
+    t = (ROOT / rel).read_text(encoding="utf-8")
+    for s in ec["configSubcodes"]:
+        if not re.search(r"^\|\s*%d\s*\|" % s["subcode"], t, re.M):
+            bad(f"{rel}: subcode {s['subcode']} missing")
+    for grp in ec["fixed"].values():
+        for fx in grp:
+            first = re.match(r"\d+", fx["code"])
+            if first and not re.search(r"^\|\s*%s" % first.group(0), t, re.M):
+                bad(f"{rel}: fixed code {fx['code']} missing")
+md = json.loads((ROOT / "spec/mdns-discovery.json").read_text(encoding="utf-8"))
+rx = re.compile(md["hostnameRegex"])
+for name in ("EnergySensor-SDM01_3PN_01-45705E597760", "EnergySensor-SPM02-14205A187661", "EnergySensor-SDM01_3PN_02-45705E597760"):
+    if not rx.match(name):
+        bad(f"spec/mdns-discovery.json hostnameRegex does not match {name}")
+
+# 8. every tool file in tools/lan is listed in its README
+lan_readme = (ROOT / "tools/lan/README.md").read_text(encoding="utf-8")
+for py in sorted((ROOT / "tools/lan").glob("*.py")):
+    if py.name not in lan_readme:
+        bad(f"tools/lan/{py.name} is not mentioned in tools/lan/README.md")
+
 print("checked", len(md_files), "markdown files; problems:", problems)
 sys.exit(1 if problems else 0)

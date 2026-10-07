@@ -1,0 +1,29 @@
+{
+  "id": "meter-udp",
+  "title": "UDP report",
+  "channel": "udp",
+  "doc": {
+    "zh-CN": "docs/udp/udp-api.zh-CN.md",
+    "en": "docs/udp/udp-api.en.md"
+  },
+  "direction": "device -> host, one-way",
+  "functionMapBit": 13,
+  "targets": {
+    "max": 5,
+    "configure": "business command udp {IpAddress, localUdpPort, Frequency(s)}",
+    "delete": "deleteudp",
+    "list": "udpdata"
+  },
+  "period": {
+    "defaultMs": 5000,
+    "minMs": 100,
+    "sharedByAllTargets": true
+  },
+  "sourcePort": 2390,
+  "plainPayload": "telemetry JSON, same as MQTT /data",
+  "encryptedPayload": {
+    "algorithm": "AES-CCM",
+    "key": "broadcast key (see docs/udp section 4)",
+    "availableOn": "Pro (SDMV2 crypto build with HTTPS on)"
+  }
+}

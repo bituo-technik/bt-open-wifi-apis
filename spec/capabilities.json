@@ -1,0 +1,66 @@
+{
+  "id": "meter-capabilities",
+  "title": "Branch and channel capabilities",
+  "doc": {
+    "zh-CN": "docs/overview/open-wifi-overview.zh-CN.md",
+    "en": "docs/overview/open-wifi-overview.en.md"
+  },
+  "branches": {
+    "basic": {
+      "firmware": "SXM",
+      "ble": "plain A002",
+      "crypto": false,
+      "tlsSlots": 0
+    },
+    "lite": {
+      "firmware": "SXM",
+      "ble": "secured A003",
+      "crypto": true,
+      "tlsSlots": "MQTTS only"
+    },
+    "basicPlus": {
+      "firmware": "SDMV2 C3",
+      "ble": "plain A002",
+      "crypto": false,
+      "tlsSlots": 1
+    },
+    "pro": {
+      "firmware": "SDMV2 C6",
+      "ble": "secured A003",
+      "crypto": true,
+      "tlsSlots": 2
+    }
+  },
+  "tlsPriority": [
+    "MQTTS",
+    "HTTPS",
+    "WSS",
+    "Modbus TLS"
+  ],
+  "functionMapBits": {
+    "15": "Modbus TCP",
+    "14": "TLS",
+    "13": "UDP",
+    "11": "WebSocket",
+    "10": "WebSocket TLS",
+    "9": "MQTT",
+    "8": "MQTTS",
+    "7": "HTTP"
+  },
+  "defaultPorts": {
+    "http": 80,
+    "https": 443,
+    "websocket": 81,
+    "modbusTcp": 502,
+    "mdns": 5353,
+    "udpSource": 2390
+  },
+  "responseEnvelope": {
+    "ok": "bool",
+    "msg": "string",
+    "event": "string",
+    "d": "object, optional",
+    "code": "int, only when ok=false"
+  },
+  "inboundJsonMaxBytes": 1024
+}

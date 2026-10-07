@@ -1,0 +1,59 @@
+{
+  "id": "meter-mqtt",
+  "title": "MQTT API",
+  "channel": "mqtt",
+  "doc": {
+    "zh-CN": "docs/mqtt/mqtt-api.zh-CN.md",
+    "en": "docs/mqtt/mqtt-api.en.md"
+  },
+  "role": "device is an MQTT client; user provides broker",
+  "topics": {
+    "pattern": "{Model}/{SerialNumber}/{suffix}",
+    "serialNumber": "12 uppercase hex characters",
+    "suffixes": {
+      "data": {
+        "direction": "device->server",
+        "qos": 0,
+        "retain": false,
+        "content": "telemetry JSON"
+      },
+      "cmd": {
+        "direction": "server->device",
+        "qos": 0,
+        "retain": false,
+        "content": "command JSON"
+      },
+      "cdata": {
+        "direction": "device->server",
+        "qos": 0,
+        "retain": false,
+        "content": "unified response"
+      },
+      "mdata": {
+        "direction": "device->server",
+        "qos": 0,
+        "retain": true,
+        "content": "{product, Serialnumber, fwVer, wifiname}; published on every broker connect"
+      }
+    },
+    "readActualTopics": "business command mqttdata -> TP/TC/TR/TM",
+    "changeWith": [
+      "topic1",
+      "topic2"
+    ],
+    "maxTopicLength": 63
+  },
+  "command": {
+    "requiredField": "cmd",
+    "maxBytes": 1024,
+    "oversizeOrBadJson": "dropped, no response",
+    "pairBy": "event (no seq)"
+  },
+  "lastWill": false,
+  "mqttCommandSegments": "see docs section 7.1 (host|port|user|password|interval seconds ...)",
+  "tls": {
+    "functionMapBit": 8,
+    "plainBit": 9,
+    "priority": 1
+  }
+}

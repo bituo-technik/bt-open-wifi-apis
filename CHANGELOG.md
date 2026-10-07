@@ -2,6 +2,41 @@
 
 格式：按日期倒序。"对齐固件"写明文档 / 工具核对过的固件版本。
 
+## 2026-10-07 — 初版补全：Wi-Fi 侧全部通道
+
+**对齐固件：** 源码快照 SXM_EW_C3 `5.1.16`、SDMV2_EW_C3 `1.2.12`、SDMV2_EW_C6 `3.1.19`；线上 Gitbook 的 Overview / MQTT / mDNS / Modbus TCP 页面（2026-05 ~ 2026-06 版本）。固件分支与源码的对应关系（Basic = SXM 无加密，Lite = SXM + `BLE_APP_CRYPTO_ENABLE`，Basic+ = SDMV2 C3，Pro = SDMV2 C6）由源码和版本号推断，不是官方对照表。
+
+### 文档（均有 zh-CN / en）
+- `docs/overview/open-wifi-overview`：固件分支、通道能力矩阵、TLS 槽位限制（优先级 MQTTS > HTTPS > WSS > Modbus TLS）、选通道。
+- `docs/mdns/`、`docs/modbus-tcp/`、`docs/http/`、`docs/websocket/`、`docs/mqtt/`、`docs/udp/`：各通道的连接方式、限制、示例、排错；WebSocket、UDP 为全新编写，HTTP 此前没有独立文档。
+- `docs/reference/telemetry-payload`（遥测字段，四个通道共用）、`docs/reference/error-codes`（统一应答、通道基数 + 子码、固定码、撞号说明）。
+- 重写 `docs/SUMMARY.md`、`docs/README.md`、根 `README.md`、`AGENTS.md`、`REPO_ORGANIZATION.md`。
+
+### 机器可读与工具
+- `spec/`：`modbus-tcp-map.json`（寄存器表）、`http-endpoints.json`、`mqtt-api.json`、`websocket-api.json`、`udp-api.json`、`mdns-discovery.json`、`capabilities.json`、`error-codes.json`、`udp-aes-test-vector.json`。
+- `tools/lan/`：`discover_mdns.py`、`modbus_poll.py`、`http_poll.py`、`ws_client.py`、`udp_listen.py`（可解 AES-CCM）、`mqtt_monitor.py`、`mock_device.py`（假电表）、`cmdarg.py`（兼容 PowerShell 5.1 丢引号的命令行写法）。
+- `scripts/check_docs.py` 增加：`spec` 合法性与 LF 行尾、Modbus 地址与两份文档逐项比对、错误码子码 / 固定码在两种语言文档里都存在、mDNS 命名正则、`tools/lan` 的工具都在 README 里。`check_test_vectors.py` 增加 UDP AES-CCM 向量。`build_bundles.py` 增加各 Wi-Fi 通道合集和 `open-wifi-all`。
+
+### 待确认（文档以固件源码为准，请用真机或固件同事核实后更新）
+1. **Modbus 定位寄存器**：Gitbook 写 `10000 (0x2710)`；源码里 Wi-Fi 模块通过 Modbus TCP 只处理 `10001`（清零）和 `10002`（定位），`10000` 是表侧 MCU 上同一功能的地址。
+2. **Modbus 连接行为**：Gitbook 写"只支持 1 个连接、每次读后复位 socket、必须每次重连"；源码是 Basic / Lite / Pro 最多 2 个、Basic+ 最多 1 个，连接保持，空闲 30 秒（定制固件 12 秒）断开，一次只应答最新一帧。文档保留了"每次重连也可用"的建议。
+3. **Modbus 寄存器 994（RSSI）**：Gitbook 写负的 dBm；源码写入 `-rssi` 到无符号寄存器，读到的是绝对值（如 68）。Gitbook 里 MCU 版本 / Wi-Fi 固件版本的示例也写反了（989 是 MCU，997 是 Wi-Fi 固件）。
+4. **`commonmode = 1`**：源码里 Modbus 读取映射和遥测格式都会随之切换，文档只描述默认布局（`commonmode = 0`），通用格式的寄存器布局未写入；`mda` / `minvert` 只在 SXM / SDMV2 固件存在，文档仅提及。
+5. **UDP AES-CCM 适用分支**：Overview 矩阵写 Lite、Pro 都支持；源码里只有 SDMV2 加密构建（Pro）、且 HTTPS 打开时才发密文，SXM（Lite）始终是明文。矩阵保持线上版本并加了脚注。
+6. **mDNS 主机名**：Gitbook 说 `VARIANT` 反映 HTTP 实现差异；源码里 `_01` = SXM 的 SDM01_3PN / SDM01_1PN，`_02` = SDMV2，其它 SXM 型号没有变体字段（已在局域网真机上看到 `EnergySensor-SPM02-<MAC>`）。主机名就是可改的设备名称（`deviceName`），改名后前缀过滤会失效，文档已说明。
+7. **MQTT 默认上报间隔**：源码 5 秒，线上文档写 30 秒；文档提示以设备 `MI` 为准。
+8. **`TP`**：源码里它是型号代码（SDM01 Gen2 恒为 8），不是相数；此前线上"1 = 单相、3 = 三相"只对 SPM01 / SPM02 成立。
+9. **`/uploadcefile`** 的参数顺序、首尾各丢一个字符等行为很别扭，文档如实记录并推荐 `/upload` 或 BLE `cafilestart`。
+10. Modbus TLS 连接的空闲超时、`mqtt_monitor.py` 对真实 Broker 的行为尚未验证。
+
+### 验证范围
+- `check_docs.py`、`check_test_vectors.py` 通过；全部 `tools/lan` 脚本编译通过。
+- `modbus_poll.py`、`http_poll.py`（含 token 重新登录）、`ws_client.py`、`udp_listen.py`（明文与 AES-CCM）已对 `mock_device.py` 跑通；`discover_mdns.py` 内置解析与 zeroconf 两种路径在局域网真机上都找到了设备。
+- **没有**对真机验证 Modbus / HTTP / WebSocket / UDP（发现到的那台真机 Modbus 与 HTTP 默认关闭）；`mqtt_monitor.py` 未联调（没有 Broker）。
+
+### 安全提示（给维护者）
+- 固件源码里有默认的 MQTT 测试 Broker 与账号。这些**没有**抄进任何文档、示例或工具；建议确认发布版本里是否仍然保留。
+
 ## 2026-10-07 — 初始合并：BLE 明文 + BLE 加密
 
 **对齐固件：** Basic `5.1.15`（SDM01_3PN 实机校对示例应答）；Lite / Pro 加密握手以 `BLE 安全通道 API 文档 V2` 为准，已用本仓工具在真机上跑通握手、加密配网与读写。

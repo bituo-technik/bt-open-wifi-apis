@@ -1,0 +1,896 @@
+{
+  "id": "meter-modbus-tcp",
+  "title": "Modbus TCP map (ESP32 Wi-Fi meters)",
+  "channel": "modbus-tcp",
+  "doc": {
+    "zh-CN": "docs/modbus-tcp/modbus-tcp-api.zh-CN.md",
+    "en": "docs/modbus-tcp/modbus-tcp-api.en.md"
+  },
+  "port": 502,
+  "unitId": "not checked by firmware (use 1)",
+  "functionCodes": {
+    "0x03": "read holding registers",
+    "0x04": "read input registers (same data)",
+    "0x06": "write single register (control only)"
+  },
+  "readWindow": {
+    "start": 978,
+    "count": 100,
+    "end": 1077
+  },
+  "wordOrder": "high word at lower address (ABCD)",
+  "maxClients": {
+    "basic": 2,
+    "lite": 2,
+    "basicPlus": 1,
+    "pro": 2
+  },
+  "idleTimeoutSeconds": {
+    "standardBuild": 30,
+    "customBuild": 12
+  },
+  "perRequest": "one request per response; if several ADUs are queued only the newest is answered",
+  "maxFrameBytes": 600,
+  "functionMapBit": {
+    "modbusTcp": 15,
+    "tls": 14
+  },
+  "identification": [
+    {
+      "address": 978,
+      "hex": "0x03D2",
+      "registers": 6,
+      "type": "string",
+      "en": "MAC address",
+      "zh": "设备 MAC 地址（12 个字符）",
+      "example": "e.g. 45705E597760"
+    },
+    {
+      "address": 984,
+      "hex": "0x03D8",
+      "registers": 5,
+      "type": "string",
+      "en": "Product model",
+      "zh": "产品型号（10 个字符以内）",
+      "example": "e.g. SDM01_3PN"
+    },
+    {
+      "address": 989,
+      "hex": "0x03DD",
+      "registers": 5,
+      "type": "string",
+      "en": "MCU firmware version",
+      "zh": "MCU 固件版本",
+      "example": "e.g. 003.00.13"
+    },
+    {
+      "address": 994,
+      "hex": "0x03E2",
+      "registers": 1,
+      "type": "uint16",
+      "en": "Wi-Fi RSSI as magnitude (|dBm|)",
+      "zh": "Wi-Fi 信号强度（dBm 的绝对值）",
+      "example": "68 means -68 dBm"
+    },
+    {
+      "address": 995,
+      "hex": "0x03E3",
+      "registers": 2,
+      "type": "uint32",
+      "en": "System time, Unix seconds, high word first",
+      "zh": "系统时间，Unix 秒，高字在前",
+      "example": ""
+    },
+    {
+      "address": 997,
+      "hex": "0x03E5",
+      "registers": 3,
+      "type": "string",
+      "en": "Wi-Fi firmware version",
+      "zh": "Wi-Fi 固件版本",
+      "example": "e.g. 5.1.16"
+    }
+  ],
+  "measurements": {
+    "single-phase": [
+      {
+        "address": 1000,
+        "hex": "0x03E8",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage",
+        "zh": "电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1002,
+        "hex": "0x03EA",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current",
+        "zh": "电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1004,
+        "hex": "0x03EC",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power",
+        "zh": "有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1006,
+        "hex": "0x03EE",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor",
+        "zh": "功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1008,
+        "hex": "0x03F0",
+        "registers": 2,
+        "type": "float32",
+        "en": "Frequency",
+        "zh": "频率",
+        "unit": "Hz",
+        "range": "0..1000"
+      },
+      {
+        "address": 1010,
+        "hex": "0x03F2",
+        "registers": 2,
+        "type": "float32",
+        "en": "Import active energy",
+        "zh": "正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1012,
+        "hex": "0x03F4",
+        "registers": 2,
+        "type": "float32",
+        "en": "Export active energy",
+        "zh": "反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1014,
+        "hex": "0x03F6",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total active energy (import + export)",
+        "zh": "总有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      }
+    ],
+    "split-phase": [
+      {
+        "address": 1000,
+        "hex": "0x03E8",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage L1-N",
+        "zh": "L1 电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1002,
+        "hex": "0x03EA",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage L2-N",
+        "zh": "L2 电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1006,
+        "hex": "0x03EE",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current L1",
+        "zh": "L1 电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1008,
+        "hex": "0x03F0",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current L2",
+        "zh": "L2 电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1012,
+        "hex": "0x03F4",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power L1",
+        "zh": "L1 有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1014,
+        "hex": "0x03F6",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power L2",
+        "zh": "L2 有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1018,
+        "hex": "0x03FA",
+        "registers": 2,
+        "type": "float32",
+        "en": "Reactive power L1",
+        "zh": "L1 无功功率",
+        "unit": "kVAR",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1020,
+        "hex": "0x03FC",
+        "registers": 2,
+        "type": "float32",
+        "en": "Reactive power L2",
+        "zh": "L2 无功功率",
+        "unit": "kVAR",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1024,
+        "hex": "0x0400",
+        "registers": 2,
+        "type": "float32",
+        "en": "Apparent power L1",
+        "zh": "L1 视在功率",
+        "unit": "kVA",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1026,
+        "hex": "0x0402",
+        "registers": 2,
+        "type": "float32",
+        "en": "Apparent power L2",
+        "zh": "L2 视在功率",
+        "unit": "kVA",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1030,
+        "hex": "0x0406",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor L1",
+        "zh": "L1 功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1032,
+        "hex": "0x0408",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor L2",
+        "zh": "L2 功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1036,
+        "hex": "0x040C",
+        "registers": 2,
+        "type": "float32",
+        "en": "Average voltage L-N",
+        "zh": "平均相电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1038,
+        "hex": "0x040E",
+        "registers": 2,
+        "type": "float32",
+        "en": "Average line current",
+        "zh": "平均线电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1040,
+        "hex": "0x0410",
+        "registers": 2,
+        "type": "float32",
+        "en": "Unbalanced line currents",
+        "zh": "电流不平衡度",
+        "unit": "%",
+        "range": "-300..300"
+      },
+      {
+        "address": 1042,
+        "hex": "0x0412",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total line currents",
+        "zh": "线电流之和",
+        "unit": "A",
+        "range": "0..3000"
+      },
+      {
+        "address": 1044,
+        "hex": "0x0414",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total active power",
+        "zh": "总有功功率",
+        "unit": "kW",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1046,
+        "hex": "0x0416",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total reactive power",
+        "zh": "总无功功率",
+        "unit": "kVAR",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1048,
+        "hex": "0x0418",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total apparent power",
+        "zh": "总视在功率",
+        "unit": "kVA",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1050,
+        "hex": "0x041A",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total power factor",
+        "zh": "总功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1052,
+        "hex": "0x041C",
+        "registers": 2,
+        "type": "float32",
+        "en": "Frequency",
+        "zh": "频率",
+        "unit": "Hz",
+        "range": "0..1000"
+      },
+      {
+        "address": 1054,
+        "hex": "0x041E",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total import active energy",
+        "zh": "总正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1056,
+        "hex": "0x0420",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total export active energy",
+        "zh": "总反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1058,
+        "hex": "0x0422",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total import & export active energy",
+        "zh": "总有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1060,
+        "hex": "0x0424",
+        "registers": 2,
+        "type": "float32",
+        "en": "L1 import active energy",
+        "zh": "L1 正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1062,
+        "hex": "0x0426",
+        "registers": 2,
+        "type": "float32",
+        "en": "L1 export active energy",
+        "zh": "L1 反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1064,
+        "hex": "0x0428",
+        "registers": 2,
+        "type": "float32",
+        "en": "L1 import & export active energy",
+        "zh": "L1 有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1066,
+        "hex": "0x042A",
+        "registers": 2,
+        "type": "float32",
+        "en": "L2 import active energy",
+        "zh": "L2 正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1068,
+        "hex": "0x042C",
+        "registers": 2,
+        "type": "float32",
+        "en": "L2 export active energy",
+        "zh": "L2 反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1070,
+        "hex": "0x042E",
+        "registers": 2,
+        "type": "float32",
+        "en": "L2 import & export active energy",
+        "zh": "L2 有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      }
+    ],
+    "three-phase": [
+      {
+        "address": 1000,
+        "hex": "0x03E8",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage A-N",
+        "zh": "A相电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1002,
+        "hex": "0x03EA",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage B-N",
+        "zh": "B相电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1004,
+        "hex": "0x03EC",
+        "registers": 2,
+        "type": "float32",
+        "en": "Voltage C-N",
+        "zh": "C相电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1006,
+        "hex": "0x03EE",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current A",
+        "zh": "A相电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1008,
+        "hex": "0x03F0",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current B",
+        "zh": "B相电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1010,
+        "hex": "0x03F2",
+        "registers": 2,
+        "type": "float32",
+        "en": "Current C",
+        "zh": "C相电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1012,
+        "hex": "0x03F4",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power A",
+        "zh": "A相有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1014,
+        "hex": "0x03F6",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power B",
+        "zh": "B相有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1016,
+        "hex": "0x03F8",
+        "registers": 2,
+        "type": "float32",
+        "en": "Active power C",
+        "zh": "C相有功功率",
+        "unit": "kW",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1018,
+        "hex": "0x03FA",
+        "registers": 2,
+        "type": "float32",
+        "en": "Reactive power A",
+        "zh": "A相无功功率",
+        "unit": "kVAR",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1020,
+        "hex": "0x03FC",
+        "registers": 2,
+        "type": "float32",
+        "en": "Reactive power B",
+        "zh": "B相无功功率",
+        "unit": "kVAR",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1022,
+        "hex": "0x03FE",
+        "registers": 2,
+        "type": "float32",
+        "en": "Reactive power C",
+        "zh": "C相无功功率",
+        "unit": "kVAR",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1024,
+        "hex": "0x0400",
+        "registers": 2,
+        "type": "float32",
+        "en": "Apparent power A",
+        "zh": "A相视在功率",
+        "unit": "kVA",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1026,
+        "hex": "0x0402",
+        "registers": 2,
+        "type": "float32",
+        "en": "Apparent power B",
+        "zh": "B相视在功率",
+        "unit": "kVA",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1028,
+        "hex": "0x0404",
+        "registers": 2,
+        "type": "float32",
+        "en": "Apparent power C",
+        "zh": "C相视在功率",
+        "unit": "kVA",
+        "range": "-1000..1000"
+      },
+      {
+        "address": 1030,
+        "hex": "0x0406",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor A",
+        "zh": "A相功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1032,
+        "hex": "0x0408",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor B",
+        "zh": "B相功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1034,
+        "hex": "0x040A",
+        "registers": 2,
+        "type": "float32",
+        "en": "Power factor C",
+        "zh": "C相功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1036,
+        "hex": "0x040C",
+        "registers": 2,
+        "type": "float32",
+        "en": "Average voltage L-N",
+        "zh": "平均相电压",
+        "unit": "V",
+        "range": "0..1000"
+      },
+      {
+        "address": 1038,
+        "hex": "0x040E",
+        "registers": 2,
+        "type": "float32",
+        "en": "Average line current",
+        "zh": "平均线电流",
+        "unit": "A",
+        "range": "0..1000"
+      },
+      {
+        "address": 1040,
+        "hex": "0x0410",
+        "registers": 2,
+        "type": "float32",
+        "en": "Unbalanced line currents",
+        "zh": "电流不平衡度",
+        "unit": "%",
+        "range": "-300..300"
+      },
+      {
+        "address": 1042,
+        "hex": "0x0412",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total line currents",
+        "zh": "线电流之和",
+        "unit": "A",
+        "range": "0..3000"
+      },
+      {
+        "address": 1044,
+        "hex": "0x0414",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total active power",
+        "zh": "总有功功率",
+        "unit": "kW",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1046,
+        "hex": "0x0416",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total reactive power",
+        "zh": "总无功功率",
+        "unit": "kVAR",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1048,
+        "hex": "0x0418",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total apparent power",
+        "zh": "总视在功率",
+        "unit": "kVA",
+        "range": "-3000..3000"
+      },
+      {
+        "address": 1050,
+        "hex": "0x041A",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total power factor",
+        "zh": "总功率因数",
+        "unit": "",
+        "range": "-1.0..1.0"
+      },
+      {
+        "address": 1052,
+        "hex": "0x041C",
+        "registers": 2,
+        "type": "float32",
+        "en": "Frequency",
+        "zh": "频率",
+        "unit": "Hz",
+        "range": "0..1000"
+      },
+      {
+        "address": 1054,
+        "hex": "0x041E",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total import active energy",
+        "zh": "总正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1056,
+        "hex": "0x0420",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total export active energy",
+        "zh": "总反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1058,
+        "hex": "0x0422",
+        "registers": 2,
+        "type": "float32",
+        "en": "Total import & export active energy",
+        "zh": "总有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1060,
+        "hex": "0x0424",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase A import active energy",
+        "zh": "A相正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1062,
+        "hex": "0x0426",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase A export active energy",
+        "zh": "A相反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1064,
+        "hex": "0x0428",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase A import & export active energy",
+        "zh": "A相有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1066,
+        "hex": "0x042A",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase B import active energy",
+        "zh": "B相正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1068,
+        "hex": "0x042C",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase B export active energy",
+        "zh": "B相反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1070,
+        "hex": "0x042E",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase B import & export active energy",
+        "zh": "B相有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1072,
+        "hex": "0x0430",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase C import active energy",
+        "zh": "C相正向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1074,
+        "hex": "0x0432",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase C export active energy",
+        "zh": "C相反向有功电能",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      },
+      {
+        "address": 1076,
+        "hex": "0x0434",
+        "registers": 2,
+        "type": "float32",
+        "en": "Phase C import & export active energy",
+        "zh": "C相有功电能（正向+反向）",
+        "unit": "kWh",
+        "range": "+-1999999999"
+      }
+    ]
+  },
+  "controls": [
+    {
+      "address": 10001,
+      "hex": "0x2711",
+      "fc": "0x06",
+      "value": "0x51AA",
+      "en": "Reset energy accumulators",
+      "zh": "电能清零"
+    },
+    {
+      "address": 10002,
+      "hex": "0x2712",
+      "fc": "0x06",
+      "value": "0x5055",
+      "en": "Locate (blink LED)",
+      "zh": "定位（LED 闪烁）"
+    }
+  ],
+  "exceptions": {
+    "01": "function not supported",
+    "02": "address outside the window / bad control address",
+    "03": "bad control value",
+    "05": "frame shorter than 12 bytes"
+  }
+}

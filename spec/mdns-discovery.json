@@ -1,0 +1,27 @@
+{
+  "id": "meter-mdns",
+  "title": "mDNS discovery",
+  "channel": "mdns",
+  "doc": {
+    "zh-CN": "docs/mdns/mdns-discovery.zh-CN.md",
+    "en": "docs/mdns/mdns-discovery.en.md"
+  },
+  "serviceType": "_http._tcp.local.",
+  "port": 80,
+  "txt": [],
+  "hostnamePattern": "EnergySensor-<MODEL>[_<VARIANT>]-<MAC12UPPER>",
+  "hostnameRegex": "^EnergySensor-(?P<model>[A-Z0-9]+(?:_[A-Z0-9]+)*?)(?:_(?P<variant>0[0-9]))?-(?P<mac>[0-9A-F]{12})$",
+  "variants": {
+    "01": "SXM firmware, SDM01_3PN / SDM01_1PN",
+    "02": "SDMV2 firmware",
+    "none": "SXM firmware, other models"
+  },
+  "renamedWith": "deviceName (<=30 chars)",
+  "announcedWhen": "after every successful Wi-Fi connection",
+  "afterDiscovery": {
+    "modbusTcp": 502,
+    "http": 80,
+    "https": 443,
+    "websocket": 81
+  }
+}

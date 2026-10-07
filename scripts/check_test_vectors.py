@@ -46,6 +46,18 @@ for name, base in (("client_to_device", c2d), ("client_to_device_counter_2", c2d
     plain = AESCCM(sk, tag_length=8).decrypt(nonce, blob, None).decode("utf-8")
     eq("envelope " + name, plain, item["plaintext"])
 
+# encrypted UDP datagram (docs/udp): checked with the plain formula and with tools/lan/udp_listen.py
+u = json.loads((ROOT / "spec" / "udp-aes-test-vector.json").read_text(encoding="utf-8"))
+ukey = bytes.fromhex(u["key_hex"])
+env = u["datagram"]
+unonce = b"\x00" * 8 + int(env["counter"]).to_bytes(4, "big")
+eq("udp nonce", unonce.hex(), u["nonce"]["hex"])
+uplain = AESCCM(ukey, tag_length=8).decrypt(unonce, base64.b64decode(env["ct"]) + base64.b64decode(env["tag"]), None).decode("utf-8")
+eq("udp datagram", uplain, u["plaintext"])
+sys.path.insert(0, str(ROOT / "tools" / "lan"))
+import udp_listen  # noqa: E402
+eq("udp_listen.decrypt", udp_listen.decrypt(env, ukey), json.loads(u["plaintext"]))
+
 m = v["manual_pairing_code"]
 eq("manual code -> pin", c.pin_from_manual_pairing_code(m["code11"]), m["pin"])
 try:

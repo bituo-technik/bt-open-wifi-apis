@@ -2,7 +2,7 @@
 
 > 技术笔记（对人）+ 协作约定（对 AI）。  
 > 对应线上入口：[SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview)  
-> 文档版本：2026-10 · 状态：BLE 明文 + BLE 加密已落地；HTTP / MQTT / mDNS / Modbus TCP / WebSocket / UDP 待迁入
+> 文档版本：2026-10 · 状态：初版齐全——BLE 明文 / 加密，以及 Wi-Fi 侧的 Overview、mDNS、Modbus TCP、HTTP、WebSocket、MQTT、UDP、遥测格式、错误码均已落地（依据固件源码核对，差异见 CHANGELOG"待确认"）
 
 ---
 
@@ -57,17 +57,21 @@ bt-open-wifi-apis/
 ├── docs/
 │   ├── README.md                  阅读路径
 │   ├── SUMMARY.md                 Gitbook 目录
-│   ├── ble-common/                两个 BLE 通道共用的业务命令参考（zh-CN / en）
+│   ├── overview/                  Wi-Fi 总览：固件分支、能力矩阵、TLS 槽位、选通道
+│   ├── mdns/ modbus-tcp/ http/    各 Wi-Fi 通道：连接方式、报文包装、限制、示例、排错
+│   │   websocket/ mqtt/ udp/
+│   ├── reference/                 遥测数据格式、错误码（各通道共用，各一份）
+│   ├── ble-common/                所有通道共用的业务命令参考（zh-CN / en）
 │   ├── ble-plaintext/             明文 BLE 传输层（Basic / Basic+，A002）
-│   ├── ble-secured/               加密 BLE 传输层（Lite / Pro，A003）+ 协议权威参考
-│   └── …                          将来：overview / mqtt / http / mdns / websocket / udp / modbus-tcp
+│   └── ble-secured/               加密 BLE 传输层（Lite / Pro，A003）+ 协议权威参考
 │
 ├── tools/
 │   ├── README.md
+│   ├── lan/                       Wi-Fi 通道命令行工具（mDNS / Modbus / HTTP / WS / UDP / MQTT）+ 假电表
 │   ├── ble-plaintext/             Web Bluetooth 页 + Windows 工具
 │   └── ble-secured/               同上，含离线单文件页与 bundle 脚本
 │
-├── spec/                          机器可读：命令清单、测试向量
+├── spec/                          机器可读：命令清单、Modbus 寄存器表、HTTP / MQTT / WS / UDP / mDNS 清单、错误码、测试向量
 ├── scripts/                       生成单页合集、校验链接 / 测试向量
 └── dist/                          生成物（不入库）
 ```
@@ -80,6 +84,10 @@ bt-open-wifi-apis/
 | `tools/<channel>/` | 手测、演示、现场配网 | 行为样例；协议仍以 docs 为准 |
 | `spec/ble-plain-api.json` | 一般不读 | 命令表；**须与 `docs/ble-common` 一致** |
 | `spec/ble-secured-test-vectors.json` | 实现加密通道时自测 | 已知答案测试向量（PBKDF2 / HKDF / AES-CCM / 11 位配网码） |
+| `spec/modbus-tcp-map.json` | 一般不读 | 寄存器表（三种相数）；**`check_docs.py` 逐地址与两份文档比对** |
+| `spec/{http-endpoints,mqtt-api,websocket-api,udp-api,mdns-discovery,capabilities}.json` | 一般不读 | 各通道的端口、路径、限制、命名规则；文档是权威，清单供程序读取 |
+| `spec/error-codes.json` | 一般不读 | 子码与固定码清单；`check_docs.py` 检查两份文档都有 |
+| `spec/udp-aes-test-vector.json` | 实现 UDP 解密时自测 | AES-CCM 向量（由文档参数生成，未经真机抓包） |
 | `dist/` | Gitbook 粘贴、发给 AI | 一个文件包含"传输层 + 业务层"的完整内容 |
 
 ---
@@ -133,7 +141,7 @@ bt-open-wifi-apis/
 |------|----------|------|
 | 明文 BLE | Chrome Web Bluetooth + Windows PyQt6 / bleak | 界面中 / 英切换 |
 | 加密 BLE | 同上 + 离线单文件网页 | 开发用分文件版，客户用 `*.offline.html` 单文件 |
-| HTTP / MQTT / WebSocket | 后续 | 浏览器需处理 CORS / WS 入口 |
+| Wi-Fi 通道 | `tools/lan/` 命令行脚本（Python 标准库为主）+ 假电表 `mock_device.py` | 浏览器直连设备会遇到 CORS / 混合内容问题，所以用命令行；假电表只遵循文档行为 |
 
 工具与文档协议必须一致；UI 语言可中 / 英，线上 JSON / `msg` 不翻译。
 
@@ -166,10 +174,10 @@ bt-open-wifi-apis/
 ## 8. 演进顺序（建议）
 
 1. ~~BLE 明文~~、~~BLE 加密~~ 已迁入  
-2. 迁入 / 对齐 MQTT、HTTP、mDNS、Modbus TCP 文档  
-3. 补 WebSocket、UDP  
-4. 把 `docs/overview` 对齐线上 Overview（能力矩阵放这里）  
-5. 需要时开通 Gitbook Git Sync（Project directory 指向 `docs/`）  
+2. ~~MQTT、HTTP、mDNS、Modbus TCP、WebSocket、UDP、Overview、遥测格式、错误码~~ 已按固件源码写成初版  
+3. 对照真机逐项确认 CHANGELOG"待确认"里的差异（定位寄存器、Modbus 连接行为、UDP AES 适用分支等），确认后更新文档  
+4. 需要时开通 Gitbook Git Sync（Project directory 指向 `docs/`，目录用 `docs/SUMMARY.md`），然后把线上旧页面指向本仓版本  
+5. 增加继电器（SRS）产品线时，单开 `docs/srs/` 与 `spec/`，不要混进现有电表页面  
 
 ---
 

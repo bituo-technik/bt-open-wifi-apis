@@ -7,6 +7,8 @@
 | Basic / Basic+ | `0xA002`（明文） | [`ble-plaintext/`](ble-plaintext/) | [明文 BLE 接口说明](../docs/ble-plaintext/ble-plaintext-api.zh-CN.md) |
 | Lite / Pro | `0xA003`（加密） | [`ble-secured/`](ble-secured/) | [加密 BLE 接口说明](../docs/ble-secured/ble-secured-api.zh-CN.md) |
 
+Wi-Fi 通道（mDNS 发现、Modbus TCP、HTTP、WebSocket、UDP、MQTT）另有一套命令行工具和一个**假电表**（没有硬件也能调试），见 [`lan/`](lan/README.md)。
+
 不知道设备属于哪一种：扫描后看 GATT 服务，`A002` 用明文工具，`A003` 用加密工具。
 
 业务 JSON（Wi-Fi、查询、MQTT、Modbus、UDP、OTA …）两个通道相同：[业务命令参考](../docs/ble-common/ble-business-api.zh-CN.md)。

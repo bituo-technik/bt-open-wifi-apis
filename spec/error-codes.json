@@ -1,0 +1,656 @@
+{
+  "id": "meter-error-codes",
+  "title": "Error codes",
+  "doc": {
+    "zh-CN": "docs/reference/error-codes.zh-CN.md",
+    "en": "docs/reference/error-codes.en.md"
+  },
+  "rule": "code is present only when ok=false; code = channelBase + subcode for configuration errors; fixed codes share the same ranges, so disambiguate by event + English msg",
+  "channelBase": {
+    "ble": 1000,
+    "http": 2000,
+    "mqtt": 3000,
+    "websocket": 4000
+  },
+  "noSpecificCode": -1,
+  "configSubcodes": [
+    {
+      "subcode": 1,
+      "msg": "(empty msg)",
+      "description": "Unclassified failure"
+    },
+    {
+      "subcode": 2,
+      "msg": "Error password length!",
+      "description": "New password too long"
+    },
+    {
+      "subcode": 3,
+      "msg": "auth error",
+      "description": "Auth string wrong or wrong length"
+    },
+    {
+      "subcode": 4,
+      "msg": "bad value",
+      "description": "Invalid numeric parameter (for example report interval)"
+    },
+    {
+      "subcode": 5,
+      "msg": "unsupported",
+      "description": "Command not supported by this model or branch"
+    },
+    {
+      "subcode": 6,
+      "msg": "null",
+      "description": "No data for this model (for example no schedule)"
+    },
+    {
+      "subcode": 7,
+      "msg": "lorawan unsupported",
+      "description": "This model has no LoRaWAN"
+    },
+    {
+      "subcode": 8,
+      "msg": "lorawan rejoin failed",
+      "description": "LoRaWAN rejoin failed"
+    },
+    {
+      "subcode": 9,
+      "msg": "lorawan upload failed",
+      "description": "LoRaWAN upload queue failed"
+    },
+    {
+      "subcode": 10,
+      "msg": "lorawan region password failed",
+      "description": "Region change password wrong"
+    },
+    {
+      "subcode": 11,
+      "msg": "lorawan region failed",
+      "description": "Region update failed"
+    },
+    {
+      "subcode": 12,
+      "msg": "lorawan config disabled",
+      "description": "LoRaWAN configuration disabled"
+    },
+    {
+      "subcode": 13,
+      "msg": "lorawan config save failed",
+      "description": "LoRaWAN configuration save failed"
+    },
+    {
+      "subcode": 14,
+      "msg": "functionMap error",
+      "description": "Channel combination invalid or over the limit"
+    },
+    {
+      "subcode": 15,
+      "msg": "unknow cmd",
+      "description": "Unknown command (spelled like this in the firmware)"
+    },
+    {
+      "subcode": 16,
+      "msg": "Timer not found",
+      "description": "Timer does not exist"
+    },
+    {
+      "subcode": 17,
+      "msg": "Invalid timer",
+      "description": "Invalid timer parameters"
+    },
+    {
+      "subcode": 18,
+      "msg": "Error wifi ssid/pass required!",
+      "description": "SSID or password missing"
+    },
+    {
+      "subcode": 19,
+      "msg": "Error wifi length!",
+      "description": "Wi-Fi parameter length invalid"
+    },
+    {
+      "subcode": 20,
+      "msg": "Error wifi reset in progress",
+      "description": "Wi-Fi is reconnecting; try again later"
+    },
+    {
+      "subcode": 21,
+      "msg": "Error mqtt data empty!",
+      "description": "A required MQTT field is empty"
+    },
+    {
+      "subcode": 22,
+      "msg": "Error length!",
+      "description": "MQTT or other field length error"
+    },
+    {
+      "subcode": 23,
+      "msg": "cafile error",
+      "description": "Root certificate write flow error"
+    },
+    {
+      "subcode": 24,
+      "msg": "UDP full",
+      "description": "UDP target list full (5), or IP / port invalid"
+    },
+    {
+      "subcode": 25,
+      "msg": "UDP not found",
+      "description": "The UDP target to delete does not exist"
+    },
+    {
+      "subcode": 26,
+      "msg": "Old Password Error",
+      "description": "Old password wrong"
+    },
+    {
+      "subcode": 27,
+      "msg": "Error name length!",
+      "description": "Name too long"
+    },
+    {
+      "subcode": 28,
+      "msg": "mda format error",
+      "description": "Register extension data format error"
+    },
+    {
+      "subcode": 29,
+      "msg": "mda failed",
+      "description": "Register extension processing failed"
+    },
+    {
+      "subcode": 30,
+      "msg": "minvert data format error",
+      "description": "Inversion configuration format error"
+    },
+    {
+      "subcode": 31,
+      "msg": "minvert save failed",
+      "description": "Inversion configuration save failed"
+    },
+    {
+      "subcode": 32,
+      "msg": "minvert data length error",
+      "description": "Inversion configuration length error"
+    },
+    {
+      "subcode": 33,
+      "msg": "minvert data error",
+      "description": "Inversion configuration data error"
+    },
+    {
+      "subcode": 34,
+      "msg": "minvert missing data",
+      "description": "Inversion configuration data missing"
+    },
+    {
+      "subcode": 35,
+      "msg": "bleota no data",
+      "description": "BLE OTA received no data"
+    },
+    {
+      "subcode": 36,
+      "msg": "bleota err param",
+      "description": "BLE OTA invalid parameters"
+    },
+    {
+      "subcode": 37,
+      "msg": "bleota err state",
+      "description": "BLE OTA state error (not started or already done)"
+    },
+    {
+      "subcode": 38,
+      "msg": "bleota err seq",
+      "description": "BLE OTA packet sequence broken; transfer aborted"
+    },
+    {
+      "subcode": 39,
+      "msg": "bleota err crc",
+      "description": "BLE OTA CRC check failed"
+    },
+    {
+      "subcode": 40,
+      "msg": "bleota err write",
+      "description": "BLE OTA partition write failed"
+    },
+    {
+      "subcode": 41,
+      "msg": "bleota err size",
+      "description": "BLE OTA firmware size over the limit"
+    },
+    {
+      "subcode": 42,
+      "msg": "bleota err unknown",
+      "description": "BLE OTA unknown error"
+    },
+    {
+      "subcode": 43,
+      "msg": "scan busy",
+      "description": "Wi-Fi scan in progress; cannot trigger again"
+    },
+    {
+      "subcode": 44,
+      "msg": "scan not ready",
+      "description": "Wi-Fi scan result not ready"
+    },
+    {
+      "subcode": 45,
+      "msg": "ota mem insufficient",
+      "description": "Not enough memory to upgrade"
+    },
+    {
+      "subcode": 46,
+      "msg": "Error enablehttps!",
+      "description": "Invalid `enablehttps` parameter (Pro only)"
+    }
+  ],
+  "fixed": {
+    "ble": [
+      {
+        "code": "1000",
+        "msg": "auth error",
+        "description": "Phone auth string does not match the device"
+      },
+      {
+        "code": "1001",
+        "msg": "not authenticated",
+        "description": "Authentication not completed"
+      },
+      {
+        "code": "1002",
+        "msg": "Please unlock",
+        "description": "Unlock first; `event` is `pas` on the write characteristic notification and `read` on the read characteristic"
+      },
+      {
+        "code": "1003",
+        "msg": "Password Error",
+        "description": "BLE password wrong"
+      },
+      {
+        "code": "1004",
+        "msg": "No cmd",
+        "description": "`cmd` missing"
+      },
+      {
+        "code": "1005",
+        "msg": "No data received",
+        "description": "Switch-extension configuration missing parameters"
+      },
+      {
+        "code": "1010",
+        "msg": "secure channel required",
+        "description": "Establish the secured channel first"
+      },
+      {
+        "code": "1011",
+        "msg": "cipher envelope required",
+        "description": "A ciphertext envelope is required"
+      },
+      {
+        "code": "1012",
+        "msg": "decrypt failed",
+        "description": "Decryption failed"
+      },
+      {
+        "code": "1013",
+        "msg": "payload too large",
+        "description": "Decrypted or secured payload too long"
+      },
+      {
+        "code": "1014",
+        "msg": "plain json invalid",
+        "description": "JSON invalid after decryption"
+      },
+      {
+        "code": "1015",
+        "msg": "missing cmd / cipher envelope required",
+        "description": "Command missing, or envelope incomplete"
+      },
+      {
+        "code": "1020",
+        "msg": "version failed",
+        "description": "Secured protocol version negotiation failed"
+      },
+      {
+        "code": "1021",
+        "msg": "invalid step",
+        "description": "Reset flow step mismatch"
+      },
+      {
+        "code": "1022",
+        "msg": "—",
+        "description": "J-PAKE not active when resetting the session"
+      },
+      {
+        "code": "1030",
+        "msg": "no pending round1 response",
+        "description": "No pending Round1 response to fetch"
+      },
+      {
+        "code": "1031",
+        "msg": "client nonce mismatch",
+        "description": "Client nonce mismatch"
+      },
+      {
+        "code": "1032",
+        "msg": "round1 response unavailable",
+        "description": "Round1 response unavailable"
+      },
+      {
+        "code": "1033",
+        "msg": "invalid step",
+        "description": "J-PAKE Round1 step error"
+      },
+      {
+        "code": "1034",
+        "msg": "invalid round1 chunk",
+        "description": "Invalid chunk parameters"
+      },
+      {
+        "code": "1035",
+        "msg": "round1 chunk out of order",
+        "description": "Chunk order error"
+      },
+      {
+        "code": "1036",
+        "msg": "jpake round1 failed",
+        "description": "J-PAKE Round1 failed"
+      },
+      {
+        "code": "1037",
+        "msg": "round1 response prepare failed",
+        "description": "Preparing Round1 response chunks failed"
+      },
+      {
+        "code": "1040",
+        "msg": "invalid step",
+        "description": "J-PAKE Round2 step error"
+      },
+      {
+        "code": "1041",
+        "msg": "jpake round2 failed",
+        "description": "J-PAKE Round2 failed"
+      },
+      {
+        "code": "1045",
+        "msg": "invalid step",
+        "description": "Session nonce phase step error"
+      },
+      {
+        "code": "1046",
+        "msg": "session nonce failed",
+        "description": "Session nonce exchange failed"
+      },
+      {
+        "code": "1047",
+        "msg": "cipher envelope required / secure channel required",
+        "description": "Envelope or channel missing in the session state"
+      },
+      {
+        "code": "1050",
+        "msg": "payload too large",
+        "description": "Plaintext write too long"
+      },
+      {
+        "code": "1051",
+        "msg": "invalid secure json",
+        "description": "JSON invalid in secured mode"
+      },
+      {
+        "code": "1060",
+        "msg": "secure encrypt failed",
+        "description": "Encrypting the read characteristic response failed"
+      },
+      {
+        "code": "1061",
+        "msg": "secure auth required",
+        "description": "Read characteristic requires secured authentication first"
+      },
+      {
+        "code": "1080 and up",
+        "msg": "dynamic English",
+        "description": "Specific errors from the lower security module; use what the device returns"
+      }
+    ],
+    "http": [
+      {
+        "code": "2000",
+        "msg": "use_https",
+        "description": "Policy requires HTTPS (port 80 returns 403)"
+      },
+      {
+        "code": "2001",
+        "msg": "need token",
+        "description": "A session token is required"
+      },
+      {
+        "code": "2002",
+        "msg": "invalid token",
+        "description": "Token invalid or expired"
+      },
+      {
+        "code": "2003",
+        "msg": "wrong password",
+        "description": "Sign-in password wrong"
+      },
+      {
+        "code": "2004",
+        "msg": "password too long",
+        "description": "Sign-in password too long (limit 16)"
+      },
+      {
+        "code": "2005",
+        "msg": "need signin",
+        "description": "Sign in first"
+      },
+      {
+        "code": "2006",
+        "msg": "no password",
+        "description": "No Web password set (status hint)"
+      },
+      {
+        "code": "2007",
+        "msg": "no password set",
+        "description": "No Web password set (sign-in case)"
+      },
+      {
+        "code": "2008",
+        "msg": "missing newpass",
+        "description": "New password parameter missing"
+      },
+      {
+        "code": "2009",
+        "msg": "bad newpass length",
+        "description": "New password length invalid (1 to 16)"
+      },
+      {
+        "code": "2010",
+        "msg": "old password wrong",
+        "description": "Old password wrong"
+      },
+      {
+        "code": "2011",
+        "msg": "nvs save failed",
+        "description": "Saving the Web password failed"
+      },
+      {
+        "code": "2012",
+        "msg": "log file not found (Chinese msg)",
+        "description": "Log file does not exist"
+      },
+      {
+        "code": "2020",
+        "msg": "wifi not available!",
+        "description": "No Wi-Fi; cannot download the remote page"
+      },
+      {
+        "code": "2021",
+        "msg": "Error on HTTP request!",
+        "description": "Remote HTTP request failed"
+      },
+      {
+        "code": "2022",
+        "msg": "Error!",
+        "description": "Opening or writing the local page file failed, or another update error"
+      },
+      {
+        "code": "2023",
+        "msg": "download error!",
+        "description": "Remote page download interrupted"
+      },
+      {
+        "code": "2030",
+        "msg": "No text received.",
+        "description": "Certificate upload received no body"
+      },
+      {
+        "code": "2040",
+        "msg": "No data received",
+        "description": "`/save-config` received no body"
+      },
+      {
+        "code": "2041",
+        "msg": "payload too large",
+        "description": "`/save-config` body too long"
+      },
+      {
+        "code": "2050",
+        "msg": "No data received",
+        "description": "`/schedule` received no body (relay)"
+      },
+      {
+        "code": "2051",
+        "msg": "payload too large",
+        "description": "`/schedule` body too long (relay)"
+      },
+      {
+        "code": "2060",
+        "msg": "No data received",
+        "description": "`/switch-config` received no body"
+      },
+      {
+        "code": "2061",
+        "msg": "payload too large",
+        "description": "`/switch-config` body too long"
+      },
+      {
+        "code": "2062",
+        "msg": "No data received",
+        "description": "`/switch-config` lacks `configType` / `cmd`"
+      },
+      {
+        "code": "2070",
+        "msg": "bad json",
+        "description": "`/save-config` JSON cannot be parsed"
+      },
+      {
+        "code": "2071",
+        "msg": "bad json",
+        "description": "`/schedule` JSON cannot be parsed"
+      },
+      {
+        "code": "2072",
+        "msg": "bad json",
+        "description": "`/switch-config` JSON cannot be parsed"
+      },
+      {
+        "code": "2080",
+        "msg": "use HTTP :80 multipart POST /upload",
+        "description": "Upload endpoint misused on HTTPS"
+      },
+      {
+        "code": "2081",
+        "msg": "file open failed",
+        "description": "Opening the certificate file failed"
+      },
+      {
+        "code": "2090",
+        "msg": "path not on HTTPS API",
+        "description": "Path or method does not exist on HTTPS"
+      },
+      {
+        "code": "2091",
+        "msg": "html not found",
+        "description": "No web assets on the device"
+      },
+      {
+        "code": "2095",
+        "msg": "Unknown status!",
+        "description": "OTA status not recognized"
+      },
+      {
+        "code": "2100",
+        "msg": "Error password length!",
+        "description": "BLE password too long"
+      },
+      {
+        "code": "2101",
+        "msg": "Old password error!",
+        "description": "BLE old password wrong"
+      },
+      {
+        "code": "2102",
+        "msg": "Error name length!",
+        "description": "Device name too long"
+      },
+      {
+        "code": "2110",
+        "msg": "Product update failure!",
+        "description": "Online upgrade verify or write failed"
+      },
+      {
+        "code": "2111",
+        "msg": "HTTP get failed!",
+        "description": "Online upgrade download failed"
+      }
+    ],
+    "mqttAndWebsocket": [
+      {
+        "code": "3001",
+        "msg": "rdata",
+        "description": "Publishing the data report failed"
+      },
+      {
+        "code": "3002",
+        "msg": "wint",
+        "description": "Writing the report interval failed"
+      },
+      {
+        "code": "3010",
+        "msg": "switch-config",
+        "description": "Switch-extension configuration missing type (relay)"
+      },
+      {
+        "code": "3011",
+        "msg": "wifi",
+        "description": "Wi-Fi configuration failed"
+      },
+      {
+        "code": "code",
+        "msg": "msg",
+        "description": "Description"
+      },
+      {
+        "code": "4000",
+        "msg": "payload too large",
+        "description": "A single frame is over the length limit"
+      },
+      {
+        "code": "4001",
+        "msg": "invalid json",
+        "description": "The message is not a JSON object"
+      },
+      {
+        "code": "4002",
+        "msg": "json parse error",
+        "description": "JSON syntax error"
+      },
+      {
+        "code": "4003",
+        "msg": "invalid cmd",
+        "description": "Command field missing or empty"
+      }
+    ]
+  }
+}

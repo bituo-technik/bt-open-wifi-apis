@@ -1,0 +1,4 @@
+# All tools run on the Python standard library except where noted.
+zeroconf>=0.130        # optional: discover_mdns.py (a built-in resolver is used without it)
+cryptography>=42       # optional: udp_listen.py decryption, mock_device.py --udp-key
+paho-mqtt>=1.6         # only mqtt_monitor.py (1.x and 2.x both work)

@@ -1,0 +1,256 @@
+{
+  "id": "meter-http",
+  "title": "HTTP / HTTPS API",
+  "channel": "http",
+  "doc": {
+    "zh-CN": "docs/http/http-api.zh-CN.md",
+    "en": "docs/http/http-api.en.md"
+  },
+  "ports": {
+    "http": 80,
+    "https": 443
+  },
+  "functionMapBits": {
+    "http": 7,
+    "https": "see business appendix B"
+  },
+  "auth": {
+    "default": "no password: no endpoint needs sign-in",
+    "signin": "GET /signin?password=<pw>[&token=<own uint32>]",
+    "tokenParam": "token",
+    "tokenType": "uint32 decimal",
+    "maxTokens": 5,
+    "idleExpirySeconds": 300,
+    "maxPasswordLength": 16
+  },
+  "statusCodes": "failures normally still return HTTP 200; read ok. 403 when port 80 is refused by policy, 404 for missing log / path",
+  "responseShapes": {
+    "raw": [
+      "/data",
+      "/model",
+      "/status",
+      "/snapshot",
+      "/getSchedule",
+      "/checkota"
+    ],
+    "unified": [
+      "/restart",
+      "/location",
+      "/save-config",
+      "/getFunctionMap",
+      "/count",
+      "/low-signal-mode"
+    ],
+    "text": [
+      "/sn",
+      "/logfile"
+    ]
+  },
+  "maxBodyBytes": 1024,
+  "concurrency": "port 80 serves one request at a time",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/signin",
+      "returns": "unified",
+      "description": "sign in, returns token",
+      "tokenWhenPasswordSet": false,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/changepass",
+      "returns": "unified",
+      "description": "change Web password (newpass, oldpass)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/data",
+      "returns": "raw",
+      "description": "latest telemetry",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/model",
+      "returns": "raw",
+      "description": "device configuration (contains MQTT password in clear text)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/status",
+      "returns": "raw",
+      "description": "online state of each channel",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/snapshot",
+      "returns": "raw",
+      "description": "{data, model, status} in one call; recommended for polling",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/getFunctionMap",
+      "returns": "unified",
+      "description": "function bitmap in d.functionMap",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/sn",
+      "returns": "text",
+      "description": "Model-SerialNumber",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/count",
+      "returns": "unified",
+      "description": "cumulative /data and /snapshot calls",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/checkota",
+      "returns": "raw",
+      "description": "{otastatus}",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/low-signal-mode",
+      "returns": "unified",
+      "description": "read or write weak-signal mode (mode|value|state)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/location",
+      "returns": "unified",
+      "description": "locate device",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/zeroenergy",
+      "returns": "unified",
+      "description": "reset energy (irreversible)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/restart",
+      "returns": "unified",
+      "description": "reboot",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/ota",
+      "returns": "unified",
+      "description": "online Wi-Fi module upgrade, optional url",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/mcuota",
+      "returns": "unified",
+      "description": "metering chip upgrade, reboots",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/erase",
+      "returns": "unified",
+      "description": "erase all settings and reboot",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/deletewebpage",
+      "returns": "unified",
+      "description": "delete stored web page",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/update",
+      "returns": "unified",
+      "description": "download web page from cloud",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/clearlog",
+      "returns": "unified",
+      "description": "clear log (some models)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/logfile",
+      "returns": "text",
+      "description": "log (some models)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "GET",
+      "path": "/hadata",
+      "returns": "raw",
+      "description": "internal, used by built-in page",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "POST",
+      "path": "/save-config",
+      "returns": "unified",
+      "description": "business command as JSON body {cmd,...}; <=1024 bytes",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    },
+    {
+      "method": "POST",
+      "path": "/upload",
+      "returns": "unified",
+      "description": "multipart PEM upload as MQTT CA",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": false
+    },
+    {
+      "method": "POST",
+      "path": "/uploadcefile",
+      "returns": "unified",
+      "description": "quoted-string CA upload used by built-in page (quirky)",
+      "tokenWhenPasswordSet": true,
+      "httpsAndHttp": true
+    }
+  ],
+  "policy": {
+    "pro443On": "all business endpoints on port 80 return 403 code 2000 use_https; GET / still served"
+  }
+}

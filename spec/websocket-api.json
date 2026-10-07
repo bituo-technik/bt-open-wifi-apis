@@ -1,0 +1,57 @@
+{
+  "id": "meter-websocket",
+  "title": "WebSocket API",
+  "channel": "websocket",
+  "doc": {
+    "zh-CN": "docs/websocket/websocket-api.zh-CN.md",
+    "en": "docs/websocket/websocket-api.en.md"
+  },
+  "port": 81,
+  "path": "any",
+  "scheme": {
+    "plain": "ws",
+    "tls": "wss (same port, falls back to ws without a TLS slot)"
+  },
+  "functionMapBits": {
+    "ws": 11,
+    "wss": 10
+  },
+  "auth": null,
+  "maxClients": {
+    "default": 2,
+    "basicPlus": 1
+  },
+  "welcome": {
+    "plainOnly": true,
+    "message": {
+      "ok": true,
+      "event": "welcome",
+      "msg": "websocket connected"
+    }
+  },
+  "frames": {
+    "type": "text, single frame (no fragmentation)",
+    "maxBytes": {
+      "ws": 1024,
+      "wss": 600
+    }
+  },
+  "push": {
+    "defaultMs": 5000,
+    "minMs": 100,
+    "maxMs": 86400000,
+    "set": "setInterval {value:ms}",
+    "get": "getInterval"
+  },
+  "commands": {
+    "field": "cmd",
+    "pairBy": "event",
+    "errorEvent": "error"
+  },
+  "errors": {
+    "4000": "payload too large",
+    "4001": "invalid json",
+    "4002": "json parse error",
+    "4003": "invalid cmd"
+  }
+}
