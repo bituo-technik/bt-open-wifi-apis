@@ -139,7 +139,7 @@ async def main():
 asyncio.run(main())
 ```
 
-The [WebSocket client tool](../../tools/lan/README.md) in this repository reconnects automatically and shows pushes and responses separately.
+The [WebSocket client tool](../../tools/lan/README.en.md) in this repository reconnects automatically and shows pushes and responses separately.
 
 ## 7. Troubleshooting
 

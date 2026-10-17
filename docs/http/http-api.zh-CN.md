@@ -225,7 +225,7 @@ curl -k "https://192.168.1.50/snapshot?token=1736912345"
 
 `udp` 命令的参数名以[业务命令参考](../ble-common/ble-business-api.zh-CN.md)为准。
 
-本仓库的 [HTTP 轮询工具](../../tools/lan/README.md) 会自动处理登录和 token 续期。
+本仓库的 [HTTP 轮询工具](../../tools/lan/README.zh-CN.md) 会自动处理登录和 token 续期。
 
 ## 8. 排查
 

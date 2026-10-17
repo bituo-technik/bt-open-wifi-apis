@@ -118,4 +118,4 @@ The same telemetry JSON appears in MQTT `/data`, HTTP `/data`, WebSocket pushes,
 | [BLE Business Command Reference](../ble-common/ble-business-api.en.md) | The only description of all commands |
 | [BLE plaintext](../ble-plaintext/ble-plaintext-api.en.md) / [BLE secured](../ble-secured/ble-secured-api.en.md) | The two BLE transports |
 
-For AI use, single-file bundles are described in [`AGENTS.md`](../../AGENTS.md); machine-readable interface lists are in [`spec/`](../../spec/).
+For AI use, single-file bundles are described in [`AGENTS.en.md`](../../AGENTS.en.md); machine-readable interface lists are in [`spec/`](../../spec/).

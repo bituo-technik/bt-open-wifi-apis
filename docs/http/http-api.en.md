@@ -225,7 +225,7 @@ curl -k "https://192.168.1.50/snapshot?token=1736912345"
 
 The parameter names of the `udp` command follow the [Business Command Reference](../ble-common/ble-business-api.en.md).
 
-The [HTTP polling tool](../../tools/lan/README.md) in this repository handles sign-in and token renewal for you.
+The [HTTP polling tool](../../tools/lan/README.en.md) in this repository handles sign-in and token renewal for you.
 
 ## 8. Troubleshooting
 

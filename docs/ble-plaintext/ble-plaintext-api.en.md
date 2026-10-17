@@ -426,7 +426,7 @@ Business-layer codes (`1014`–`1044` etc., including Wi-Fi / MQTT / UDP) are in
 
 Both tools use exactly the same protocol as this document. We suggest confirming the meter's behavior with a tool before writing your own app. Both tools have a Chinese / English switch; the JSON they exchange is identical to what is described here and is never translated.
 
-**Hosting:** the official hosted web page and the Windows tool download address follow the publishing channel and will be added here once released. Tool sources are in this repository: [`tools/ble-plaintext/`](../../tools/ble-plaintext/) (see [`tools/README.md`](../../tools/README.md)).
+**Hosting:** the official hosted web page and the Windows tool download address follow the publishing channel and will be added here once released. Tool sources are in this repository: [`tools/ble-plaintext/`](../../tools/ble-plaintext/) (see [`tools/README.en.md`](../../tools/README.en.md)).
 
 ### 10.1 Chrome / Edge web page
 

@@ -65,7 +65,7 @@ With `commonmode` on, the datagram follows the generic format; see Section 6 of 
 
 ## 4. AES-CCM encrypted datagram
 
-> Scope: in the source, only the **secured builds** of SDMV2 (C3 / C6) have this feature, and it takes effect only while the **HTTPS switch** (`enablehttps`) is on. SXM builds (Basic, Lite) always send plaintext. The online documentation says Lite supports it too, which does not match the source and needs firmware confirmation; see the [CHANGELOG](../../CHANGELOG.md).
+> Scope: in the source, only the **secured builds** of SDMV2 (C3 / C6) have this feature, and it takes effect only while the **HTTPS switch** (`enablehttps`) is on. SXM builds (Basic, Lite) always send plaintext. The online documentation says Lite supports it too, which does not match the source and needs firmware confirmation; see the [CHANGELOG](../../CHANGELOG.en.md).
 
 When it is on, the datagram is no longer the telemetry JSON but a ciphertext JSON:
 
@@ -118,7 +118,7 @@ Notes:
 - **Replay protection**: `counter` resets after a device reboot, so ordering by it alone is not reliable; `Post` inside the plaintext resets too. For replay protection, use `Time` (Unix time) in the plaintext with a window check.
 - When the device has no broadcast key (for example secured provisioning was never completed), it sends an **empty datagram**. A datagram of length 0 can simply be ignored.
 - After `enablehttps` is turned off, datagrams go back to plaintext. The receiver should handle both: run `JSON.parse` first and decrypt if a `ct` field exists.
-- How to get the broadcast key out of the BLE provisioning result: the [BLE secured tools](../../tools/README.md) in this repository cache it locally, and the UDP listener tool can read it directly.
+- How to get the broadcast key out of the BLE provisioning result: the [BLE secured tools](../../tools/README.en.md) in this repository cache it locally, and the UDP listener tool can read it directly.
 
 ## 5. Receiver example
 
@@ -137,7 +137,7 @@ while True:
     print(addr[0], msg.get("SerialNumber"), msg.get("Post"))
 ```
 
-The [UDP listener tool](../../tools/lan/README.md) in this repository handles both plaintext and AES-CCM datagrams and detects loss.
+The [UDP listener tool](../../tools/lan/README.en.md) in this repository handles both plaintext and AES-CCM datagrams and detects loss.
 
 ## 6. Troubleshooting
 

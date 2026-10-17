@@ -1,4 +1,8 @@
+[English](AGENTS.en.md)
+
 # AGENTS.md — 给 AI 的入口
+
+编码工具会自动读取本文件。英文对照是 [`AGENTS.en.md`](AGENTS.en.md)。两份不一致时以本文件为准。
 
 你在使用或维护 **Bituo SPM / SDM / SXM Open Wi-Fi 设备的对外 API 文档仓**。目标有两类：
 
@@ -56,10 +60,11 @@
 
 ## B. 维护：改仓库前先读
 
-1. `REPO_ORGANIZATION.md`：目录结构与**共用业务文档**规则（§3）。
+1. [`REPO_ORGANIZATION.zh-CN.md`](REPO_ORGANIZATION.zh-CN.md)：目录结构与**共用业务文档**规则（§3）。入口页是语言选择，正文在 `.zh-CN.md` / `.en.md`。
 2. 改业务命令 → **只改** `docs/ble-common/*`（zh 与 en 同步）+ `spec/ble-business-commands.json`；不要把命令表复制回通道文档。
 3. 改通道传输层 → 只改对应 `docs/ble-plaintext` 或 `docs/ble-secured`（zh 与 en 同步，章节编号一致）。
-3a. 改 Wi-Fi 通道（`docs/{mdns,modbus-tcp,http,websocket,mqtt,udp}`）→ zh 与 en 同步；字段只改 `docs/reference/telemetry-payload.*`、错误码只改 `docs/reference/error-codes.*`（并同步 `spec/error-codes.json`）；Modbus 寄存器改 `spec/modbus-tcp-map.json` 和两份文档的表（`check_docs.py` 会逐地址比对）；通道文档开头的"依据"一行写明核对过的固件版本；固件行为与线上 Gitbook 冲突时以固件源码为准，并把差异记进 CHANGELOG 的"待确认"。
+3a. 改 Wi-Fi 通道（`docs/{mdns,modbus-tcp,http,websocket,mqtt,udp}`）→ zh 与 en 同步；字段只改 `docs/reference/telemetry-payload.*`、错误码只改 `docs/reference/error-codes.*`（并同步 `spec/error-codes.json`）；Modbus 寄存器改 `spec/modbus-tcp-map.json` 和两份文档的表（`check_docs.py` 会逐地址比对）；通道文档开头的「依据」一行写明核对过的固件版本；固件行为与线上 Gitbook 冲突时以固件源码为准，并把差异记进 CHANGELOG 的「待确认」（`CHANGELOG.zh-CN.md` 与 `CHANGELOG.en.md` 都写）。
+3b. 改入口页（根 `README`、`docs/README`、`tools/**/README`、`REPO_ORGANIZATION`、`CHANGELOG`、本文件）→ 中英正文一起改。不要把本文件收成只有语言链接的空页。
 4. 改了 `tools/ble-secured/web-ble-secured-console.html` 或 `ble_secured_crypto.js` → 运行 `py -3 tools/ble-secured/bundle_offline_html.py` 重新生成 `*.offline.html`（不要手改生成物）。
 5. 提交前运行：
 
@@ -69,9 +74,9 @@ py -3 scripts/check_test_vectors.py
 node scripts/check_test_vectors.mjs
 ```
 
-改了 `tools/lan/*.py` 后至少 `py -3 -m py_compile tools/lan/*.py`，并用 `mock_device.py` 跑一遍对应工具（见 `tools/lan/README.md`）。
+改了 `tools/lan/*.py` 后至少 `py -3 -m py_compile tools/lan/*.py`，并用 `mock_device.py` 跑一遍对应工具（见 [`tools/lan/README.zh-CN.md`](tools/lan/README.zh-CN.md)）。
 
-6. 有改动就写进 `CHANGELOG.md`，并注明对齐的固件版本。
+6. 有改动就同时写进 `CHANGELOG.zh-CN.md` 和 `CHANGELOG.en.md`，并注明对齐的固件版本。`CHANGELOG.md` 只是语言选择页。
 7. **不得提交：** `tools/ble-secured/ble_crypto_client_cache.json`、真机 PIN / LTK / 密钥、固件源码。固件仓在本机另开对照，不复制进来。
 8. 事实拿不准（固件行为、型号差异）时问用户或写进 CHANGELOG 的"待确认"，**不要**在客户文档里留 `TBD` / `待确认` 之类的占位。
 

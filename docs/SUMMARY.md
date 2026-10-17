@@ -1,9 +1,8 @@
 # Summary
 
-* [阅读路径](README.md)
-
 ## 中文
 
+* [阅读路径](README.zh-CN.md)
 * [Open Wi-Fi API 总览](overview/open-wifi-overview.zh-CN.md)
   * [mDNS 发现](mdns/mdns-discovery.zh-CN.md)
   * [Modbus TCP](modbus-tcp/modbus-tcp-api.zh-CN.md)
@@ -20,6 +19,7 @@
 
 ## English
 
+* [Reading paths](README.en.md)
 * [Open Wi-Fi API Overview](overview/open-wifi-overview.en.md)
   * [mDNS Discovery](mdns/mdns-discovery.en.md)
   * [Modbus TCP](modbus-tcp/modbus-tcp-api.en.md)

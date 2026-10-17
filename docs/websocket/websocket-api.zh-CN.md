@@ -138,7 +138,7 @@ async def main():
 asyncio.run(main())
 ```
 
-本仓库的 [WebSocket 客户端工具](../../tools/lan/README.md) 带自动重连，并能把推送和应答分开显示。
+本仓库的 [WebSocket 客户端工具](../../tools/lan/README.zh-CN.md) 带自动重连，并能把推送和应答分开显示。
 
 ## 7. 排查
 

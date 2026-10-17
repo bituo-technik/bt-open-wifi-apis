@@ -208,7 +208,7 @@ mbpoll -m tcp -a 1 -0 -B -t 3:float -r 1044 -c 1 192.168.1.50
 
 ### 6.2 原生 Python
 
-工具 [`tools/lan/modbus_poll.py`](../../tools/lan/README.md) 不依赖第三方库，并且会解析识别信息区。核心代码如下：
+工具 [`tools/lan/modbus_poll.py`](../../tools/lan/README.zh-CN.md) 不依赖第三方库，并且会解析识别信息区。核心代码如下：
 
 ```python
 import socket, struct

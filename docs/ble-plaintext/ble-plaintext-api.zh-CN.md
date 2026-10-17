@@ -426,7 +426,7 @@ Wi-Fi、`restart` / `location` / `zero` / `reset` / `deviceName`、`model` / `ge
 
 两套工具协议和本文完全一致。建议先用工具确认电表行为，再写自己的 App。工具界面支持中 / 英切换，收发的 JSON 不翻译。
 
-**托管地址：** 官方托管的网页地址与 Windows 工具下载地址以发布渠道为准，发布后补充到这里。工具源码见本仓库 [`tools/ble-plaintext/`](../../tools/ble-plaintext/)（说明见 [`tools/README.md`](../../tools/README.md)）。
+**托管地址：** 官方托管的网页地址与 Windows 工具下载地址以发布渠道为准，发布后补充到这里。工具源码见本仓库 [`tools/ble-plaintext/`](../../tools/ble-plaintext/)（说明见 [`tools/README.zh-CN.md`](../../tools/README.zh-CN.md)）。
 
 ### 10.1 Chrome / Edge 网页
 

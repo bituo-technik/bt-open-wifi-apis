@@ -205,4 +205,4 @@ mosquitto_sub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEF
 mosquitto_pub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEFF/cmd" -m '{"cmd":"location"}'
 ```
 
-The [MQTT monitor tool](../../tools/lan/README.md) in this repository can subscribe, send commands and match responses by `event`.
+The [MQTT monitor tool](../../tools/lan/README.en.md) in this repository can subscribe, send commands and match responses by `event`.

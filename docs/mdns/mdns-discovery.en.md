@@ -81,7 +81,7 @@ Ports other than 80 are not in the mDNS record; use the defaults above.
 
 | Platform | Command / tool |
 |----------|----------------|
-| Any, with Python | `python tools/lan/discover_mdns.py` (see [tools/lan](../../tools/lan/README.md)); lists every meter found |
+| Any, with Python | `python tools/lan/discover_mdns.py` (see [tools/lan](../../tools/lan/README.en.md)); lists every meter found |
 | macOS | `dns-sd -B _http._tcp` and `dns-sd -L "<name>" _http._tcp local` |
 | Linux | `avahi-browse -rt _http._tcp` |
 | Windows | Bonjour's `dns-sd` (installed with iTunes / Bonjour Print Services), or the Python tool above |

@@ -208,7 +208,7 @@ mbpoll -m tcp -a 1 -0 -B -t 3:float -r 1044 -c 1 192.168.1.50
 
 ### 6.2 Raw Python
 
-The tool [`tools/lan/modbus_poll.py`](../../tools/lan/README.md) does this with no extra libraries, and also decodes the identification block. The core is:
+The tool [`tools/lan/modbus_poll.py`](../../tools/lan/README.en.md) does this with no extra libraries, and also decodes the identification block. The core is:
 
 ```python
 import socket, struct

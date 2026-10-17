@@ -66,7 +66,7 @@ Key derivation and the envelope are in [Section 4](#4-gatt--session--secure-hand
 
 ## 2. Prompt template for AI apps
 
-Give the AI **this page, the [Business Command Reference](../ble-common/ble-business-api.en.md) and the [protocol reference](crypto-protocol.en.md) in full**, plus the prompt below. (The repository can also generate single-file bundles; see `AGENTS.md`.)
+Give the AI **this page, the [Business Command Reference](../ble-common/ble-business-api.en.md) and the [protocol reference](crypto-protocol.en.md) in full**, plus the prompt below. (The repository can also generate single-file bundles; see [`AGENTS.en.md`](../../AGENTS.en.md).)
 
 ```text
 You are implementing a BLE client for the "Energy Meter Secured BLE API" (Lite/Pro), the "Business Command Reference" and the "Protocol Reference" provided.
@@ -427,7 +427,7 @@ Same table as the plaintext channel; see [Business Command Reference, Section 6]
 
 ## 10. Demo tools
 
-The protocol is the same as this document. See [`tools/README.md`](../../tools/README.md).
+The protocol is the same as this document. See [`tools/README.en.md`](../../tools/README.en.md).
 
 **Hosting:** the official hosted web page and the Windows tool download address follow the publishing channel and will be added here once released.
 

@@ -81,7 +81,7 @@ mDNS 记录里只有 80 端口，其它端口请使用上面的默认值。
 
 | 平台 | 命令 / 工具 |
 |------|-------------|
-| 任意平台，有 Python | `python tools/lan/discover_mdns.py`（见 [tools/lan](../../tools/lan/README.md)），列出找到的所有电表 |
+| 任意平台，有 Python | `python tools/lan/discover_mdns.py`（见 [tools/lan](../../tools/lan/README.zh-CN.md)），列出找到的所有电表 |
 | macOS | `dns-sd -B _http._tcp` 与 `dns-sd -L "<名称>" _http._tcp local` |
 | Linux | `avahi-browse -rt _http._tcp` |
 | Windows | Bonjour 的 `dns-sd`（随 iTunes / Bonjour Print Services 安装），或上面的 Python 工具 |

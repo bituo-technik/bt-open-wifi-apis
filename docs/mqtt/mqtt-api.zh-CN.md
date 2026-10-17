@@ -205,4 +205,4 @@ mosquitto_sub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEF
 mosquitto_pub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEFF/cmd" -m '{"cmd":"location"}'
 ```
 
-本仓库的 [MQTT 监视工具](../../tools/lan/README.md) 可以订阅、发送命令并按 `event` 匹配应答。
+本仓库的 [MQTT 监视工具](../../tools/lan/README.zh-CN.md) 可以订阅、发送命令并按 `event` 匹配应答。

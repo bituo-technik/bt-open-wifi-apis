@@ -65,7 +65,7 @@
 
 ## 2. 用 AI 写你自己的 App
 
-把**本页全文、[业务命令参考](../ble-common/ble-business-api.zh-CN.md) 全文、[协议权威参考](crypto-protocol.zh-CN.md) 全文**连同下面这段提示词交给 AI。（也可以用仓库里生成好的单文件合集，见 `AGENTS.md`。）
+把**本页全文、[业务命令参考](../ble-common/ble-business-api.zh-CN.md) 全文、[协议权威参考](crypto-protocol.zh-CN.md) 全文**连同下面这段提示词交给 AI。（也可以用仓库里生成好的单文件合集，见 [`AGENTS.md`](../../AGENTS.md)。）
 
 ```text
 你要实现一个 BLE 客户端，对接下面的"电表加密 BLE 接口说明"（Lite/Pro）、"业务命令参考"和"协议权威参考"。
@@ -426,7 +426,7 @@ sequenceDiagram
 
 ## 10. 体验工具
 
-协议与本文一致。详见 [`tools/README.md`](../../tools/README.md)。
+协议与本文一致。详见 [`tools/README.zh-CN.md`](../../tools/README.zh-CN.md)。
 
 **托管地址：** 官方托管的网页地址与 Windows 工具下载地址以发布渠道为准，发布后补充到这里。
 
