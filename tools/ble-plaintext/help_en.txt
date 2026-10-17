@@ -38,14 +38,14 @@ getFunctionMap write C303  d.functionMap uint16, bits below
 mqttdata write C303  topics TP/TC/TR/TM, MU/MPS; MF only if MQTT enabled
 udpdata  write C303  UDP target list in d.udp_data
 getInterval write C303  d.value WebSocket push ms (unsupported / unknow cmd if no WS)
-getModbusTlsMuxSetupStatus  LAN-TLS models only; often unsupported on SXM
+getModbusTlsMuxSetupStatus  LAN-TLS models only; often unsupported on Basic / Lite
 
 -------- LAN switches (change functionMap; recommend restart after) --------
 enablehttp  {"cmd":"enablehttp","enable":true|false}  plain HTTP :80  http yes / http off
 enablewebsocket  {"cmd":"enablewebsocket","enable":true}  optional enableTLS
 enablemodbustcp  {"cmd":"enablemodbustcp","enable":true}
 enabletls   {"cmd":"enabletls","enable":true}
-enablehttps PRO / LAN-TLS models only; often unsupported on plain C3 SXM
+enablehttps PRO / LAN-TLS models only; often unsupported on Basic
 functionMap  {"cmd":"functionMap","value":int}  overwrites full map; use with care
          illegal combo functionMap error / 1014
 

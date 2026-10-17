@@ -1,6 +1,6 @@
 # WebSocket API
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（WSS 需要 TLS 名额，见[概览](../overview/open-wifi-overview.zh-CN.md#3-通道能力矩阵)） ｜ 依据：固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（WSS 需要 TLS 名额，见[概览](../overview/open-wifi-overview.zh-CN.md#3-通道能力矩阵)） ｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
 WebSocket 适合局域网里的本地中枢（例如 Home Assistant、自己写的看板）：连上之后电表**主动、周期性**地推送遥测数据，不用反复轮询；同一条连接上还可以发命令。
 

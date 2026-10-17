@@ -7,25 +7,25 @@
   },
   "branches": {
     "basic": {
-      "firmware": "SXM",
+      "firmware": "SPM/SDM",
       "ble": "plain A002",
       "crypto": false,
       "tlsSlots": 0
     },
     "lite": {
-      "firmware": "SXM",
+      "firmware": "SPM/SDM",
       "ble": "secured A003",
       "crypto": true,
       "tlsSlots": "MQTTS only"
     },
     "basicPlus": {
-      "firmware": "SDMV2 C3",
+      "firmware": "SDM01",
       "ble": "plain A002",
       "crypto": false,
       "tlsSlots": 1
     },
     "pro": {
-      "firmware": "SDMV2 C6",
+      "firmware": "SDM01 Gen2",
       "ble": "secured A003",
       "crypto": true,
       "tlsSlots": 2

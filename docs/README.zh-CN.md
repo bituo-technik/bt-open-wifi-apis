@@ -23,7 +23,8 @@
    - 明文：[ble-plaintext/ble-plaintext-api.zh-CN.md](ble-plaintext/ble-plaintext-api.zh-CN.md)
    - 加密：[ble-secured/ble-secured-api.zh-CN.md](ble-secured/ble-secured-api.zh-CN.md)
 3. 读**业务层**（发什么命令、读什么字段，所有通道通用）：[ble-common/ble-business-api.zh-CN.md](ble-common/ble-business-api.zh-CN.md)。
-4. 只有实现加密通道时才需要：[协议权威参考](ble-secured/crypto-protocol.zh-CN.md)（J-PAKE / ZKP 二进制布局、广播厂商数据）。
+4. 不连接就要从广播里读电参：[业务加密广播](ble-secured/ble-advertising.zh-CN.md)。
+5. 只有自己实现握手时才需要：[协议权威参考](ble-secured/crypto-protocol.zh-CN.md)（J-PAKE / ZKP 二进制布局、密钥派生、GATT 信封）。
 
 ## 把文档交给 AI
 

@@ -4,6 +4,14 @@
 
 Newest first. "Firmware checked" names the firmware version the docs or tools were compared with.
 
+## 2026-10-17 — Wording for a public repository
+
+### Documents
+
+- Product lines are SPM / SDM only. An internal R&D umbrella name is no longer used. Covered firmware versions are written as Basic / Lite 5.1.16, Basic+ 1.2.12, and Pro 3.1.19.
+- The repository is described as public. Readers are system integrators and DIY builders. One internal note that should not be public was removed.
+- Encrypted business advertising is no longer mixed into the GATT page or the crypto protocol. It has its own page, `docs/ble-secured/ble-advertising.*`.
+
 ## 2026-10-17 — Entry documents split by language
 
 ### Documents
@@ -15,7 +23,7 @@ Newest first. "Firmware checked" names the firmware version the docs or tools we
 
 ## 2026-10-07 — First complete Wi-Fi channel set
 
-**Firmware checked:** source snapshots SXM_EW_C3 `5.1.16`, SDMV2_EW_C3 `1.2.12`, SDMV2_EW_C6 `3.1.19`; the published Gitbook pages for Overview / MQTT / mDNS / Modbus TCP (2026-05 through 2026-06). The branch-to-source mapping (Basic = SXM without crypto, Lite = SXM + `BLE_APP_CRYPTO_ENABLE`, Basic+ = SDMV2 C3, Pro = SDMV2 C6) is inferred from source and version numbers. It is not an official cross-reference table.
+**Firmware checked:** Basic / Lite `5.1.16`, Basic+ `1.2.12`, Pro `3.1.19`; also the published Gitbook pages for Overview / MQTT / mDNS / Modbus TCP (2026-05 through 2026-06).
 
 ### Documents
 
@@ -32,16 +40,16 @@ Newest first. "Firmware checked" names the firmware version the docs or tools we
 
 ### Open points
 
-The documents follow firmware source. Confirm these on a real device, or with a firmware colleague, then update the docs.
+Confirm these on a real device, or with a firmware colleague, then update the docs.
 
-1. **Modbus locate register:** Gitbook says `10000 (0x2710)`. In source, the Wi-Fi module's Modbus TCP handler only acts on `10001` (clear) and `10002` (locate). `10000` is the same function on the meter-side MCU.
-2. **Modbus connection behavior:** Gitbook says "one connection only, socket reset after every read, must reconnect every time". Source allows up to 2 on Basic / Lite / Pro and 1 on Basic+, keeps the connection, drops it after 30 seconds idle (12 seconds on a custom firmware), and answers only the latest frame. The docs still say reconnecting every time is acceptable.
-3. **Modbus register 994 (RSSI):** Gitbook says negative dBm. Source writes `-rssi` into an unsigned register, so the value read back is the absolute value (for example 68). The Gitbook examples of MCU version vs Wi-Fi firmware version are also swapped (989 is the MCU, 997 is the Wi-Fi firmware).
-4. **`commonmode = 1`:** In source, both the Modbus read map and the telemetry format switch with this setting. The docs describe only the default layout (`commonmode = 0`). The generic-format register layout is not written down. `mda` / `minvert` exist only in SXM / SDMV2 firmware and are only mentioned.
-5. **Which branches get UDP AES-CCM:** The overview matrix says both Lite and Pro. In source, only secured SDMV2 builds (Pro) send ciphertext, and only while HTTPS is on. SXM (Lite) is always plaintext. The matrix keeps the published statement and adds a footnote.
-6. **mDNS hostname:** Gitbook says `VARIANT` reflects an HTTP implementation difference. In source, `_01` is SXM SDM01_3PN / SDM01_1PN, `_02` is SDMV2, and other SXM models have no variant field (a real LAN device was seen as `EnergySensor-SPM02-<MAC>`). The hostname is the editable device name (`deviceName`). After a rename, a prefix filter stops matching. The docs say so.
-7. **MQTT default report interval:** Source uses 5 seconds; the published docs say 30 seconds. The docs tell the reader to trust the device's `MI`.
-8. **`TP`:** In source this is a model code (always 8 on SDM01 Gen2), not a phase count. The older published claim "1 = single-phase, 3 = three-phase" holds only for SPM01 / SPM02.
+1. **Modbus locate register:** Gitbook says `10000 (0x2710)`. On the device, the Wi-Fi module's Modbus TCP handler only acts on `10001` (clear) and `10002` (locate). `10000` is the same function on the meter-side MCU.
+2. **Modbus connection behavior:** Gitbook says "one connection only, socket reset after every read, must reconnect every time". The device allows up to 2 on Basic / Lite / Pro and 1 on Basic+, keeps the connection, drops it after 30 seconds idle (12 seconds on a custom firmware), and answers only the latest frame. The docs still say reconnecting every time is acceptable.
+3. **Modbus register 994 (RSSI):** Gitbook says negative dBm. The device writes `-rssi` into an unsigned register, so the value read back is the absolute value (for example 68). The Gitbook examples of MCU version vs Wi-Fi firmware version are also swapped (989 is the MCU, 997 is the Wi-Fi firmware).
+4. **`commonmode = 1`:** Switching this value changes both the Modbus read map and the telemetry format. The docs describe only the default layout (`commonmode = 0`). The generic-format register layout is not written down. `mda` / `minvert` are only mentioned.
+5. **Which branches get UDP AES-CCM:** The published matrix says both Lite and Pro. Lite `5.1.16` always sends plaintext. The encrypted datagram appears only on Pro, and only while HTTPS is on. The matrix keeps the published statement and adds a footnote.
+6. **mDNS hostname:** The published page says `VARIANT` reflects an HTTP implementation difference. In practice `_01` is Basic / Lite SDM01_3PN and SDM01_1PN, `_02` is Basic+ / Pro, and other Basic / Lite models have no variant field. The hostname is the editable device name (`deviceName`). After a rename, a prefix filter stops matching. The docs say so.
+7. **MQTT default report interval:** The device default is 5 seconds; the published docs say 30 seconds. The docs tell the reader to trust the device's `MI`.
+8. **`TP`:** This is a model code (always 8 on SDM01 Gen2), not a phase count. The older published claim "1 = single-phase, 3 = three-phase" holds only for SPM01 / SPM02.
 9. **`/uploadcefile`** has awkward behavior (parameter order, one character dropped at each end). The docs record it as it is and recommend `/upload` or BLE `cafilestart`.
 10. Idle timeout of a Modbus TLS connection, and `mqtt_monitor.py` against a real broker, are not verified yet.
 
@@ -53,7 +61,7 @@ The documents follow firmware source. Confirm these on a real device, or with a 
 
 ### Security note for maintainers
 
-- The firmware source contains a default MQTT test broker and account. Those values were **not** copied into any document, example, or tool. Worth confirming whether a release build still contains them.
+- Do not put a test broker address or account into a document, an example, or a tool.
 
 ## 2026-10-07 — Initial merge: plaintext BLE and secured BLE
 
@@ -91,5 +99,5 @@ The documents follow firmware source. Confirm these on a real device, or with a 
 - The plaintext tools (Windows GUI and web page) still have no parity / stop-bit control on the Modbus panel (fixed `parityStop=0`).
 - Official hosted page URL and Windows tool download URL (document §10 says they will be added when published).
 - When this entry was written, `docs/overview` and the MQTT / HTTP / mDNS / WebSocket / UDP / Modbus TCP documents were not in the repo yet. The later entry from the same day added them.
-- Name prefixes: the docs say `SDM` / `SPM` / `SXM`, while both web pages also accept `SRS` (the relay product line). Whether to unify that is a product decision.
+- Name prefixes: the docs say `SDM` / `SPM`, while both web pages also accept `SRS` (the relay product line). Whether to unify that is a product decision.
 - On Pro firmware, with `enablehttps` on, the UDP payload is encrypted JSON (`ct` / `tag` / `counter`). There is still no external document for that key and format.

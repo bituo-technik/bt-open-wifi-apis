@@ -2,7 +2,7 @@
 
 This document is for third-party apps, gateways, or debugging tools integrating with the device BLE secure channel protocol. It describes only externally visible interface protocol, field definitions, interaction phases, key derivation rules, and message formats.
 
-> **Where this fits in the repo:** this is the **authoritative protocol reference** for the secured channel (Lite / Pro): J-PAKE / ZKP binary layout, key derivation, envelope, advertising manufacturer data. Integration entry point: [Secured BLE API](ble-secured-api.en.md); business commands: [Business Command Reference](../ble-common/ble-business-api.en.md). If the two documents disagree, **this one wins**.
+> **Where this fits in the repo:** this is the **authoritative protocol reference** for the secured channel (Lite / Pro): J-PAKE / ZKP binary layout, key derivation, and the GATT envelope. Integration entry: [Secured BLE API](ble-secured-api.en.md). Values read from advertising without a connection: [Encrypted business advertising](ble-advertising.en.md). Business commands: [Business Command Reference](../ble-common/ble-business-api.en.md). If this document and the API page disagree about the handshake or the envelope, **this one wins**.
 
 ## 1. Authentication Material
 
@@ -229,7 +229,7 @@ LTK (16 bytes)
 
 ### 3.5.1 Broadcast key
 
-- Used for **AES-128-CCM** encryption of the **long format (26-byte)** payload in **BLE advertising manufacturer custom data** (see **Section 9**).
+- Used for **AES-128-CCM** encryption of the **long format (26-byte)** payload in **BLE advertising manufacturer data** (byte layout: [Encrypted business advertising](ble-advertising.en.md)).
 - Uses the **same** `salt = device_nonce || client_nonce` as `LTK` (8 bytes each, same order as LTK).
 - `info = SN || protocol version || "broadcast"` (interpret as ASCII byte sequence; **no** extra terminators from JSON or debug output).
 - Input key material: `LTK` (16 bytes).
@@ -237,7 +237,7 @@ LTK (16 bytes)
 
 ### 3.5.2 Persistence of LTK and broadcast key
 
-The device writes **LTK** and **broadcast key** to non-volatile storage so that after BLE disconnect or reboot, GATT encrypted sessions can be restored via **`ble-crypto-session-nonce`**, and **Section 9** long broadcast packets can be decrypted without a connection. Persistence follows **“commit only after secure negotiation completes and Wi‑Fi association succeeds”** to avoid fixing long-term keys before the network environment is verified.
+After Wi-Fi association succeeds, the device stores the **LTK** and the **broadcast key**. A later BLE disconnect or reboot can restore the GATT session with **`ble-crypto-session-nonce`**, and the long advertising packet in [Encrypted business advertising](ble-advertising.en.md) can be decrypted without a connection. Storage happens only after the secure handshake has finished and Wi-Fi association has succeeded.
 
 #### Storage form
 
@@ -272,7 +272,7 @@ During **“LTK pending commit”**, the device **will not** write LTK or broadc
 
 ### 3.6 AES-CCM and 12-byte nonce derivation (**GATT business JSON ciphertext envelopes only**)
 
-This section describes **JSON ciphertext over Notify/Write** (Section 8), **not** **broadcast manufacturer long packets** in Section 9 (broadcast uses **4-byte tag**, see **§9.3**).
+This section describes **JSON ciphertext over Notify/Write** (Section 8), **not** the long advertising packet in [Encrypted business advertising](ble-advertising.en.md) (that tag is **4 bytes**).
 
 GATT business ciphertext uses **`AES-128-CCM`**: **no additional authenticated data (AAD length 0)**, authentication tag **`tag` length 8 bytes**.  
 The **full 12-byte CCM `nonce` is not sent in JSON**; the JSON **`nonce` field is only a 32-bit unsigned counter** (Section 8). Both sides assemble 12 bytes locally per this section before CCM encrypt/decrypt.
@@ -654,107 +654,10 @@ Therefore:
 
 ## 9. BLE Advertising Manufacturer Data (Dynamic Advertising)
 
-The following applies only on models/firmware that **provide this secure channel protocol (application-layer BLE encryption)**; devices without it do not use the manufacturer custom data described here; advertising stays conventional static policy (no short/long switch in this section).
+Encrypted business advertising has its own page: [Encrypted business advertising](ble-advertising.en.md).
 
-### 9.1 Protocol phase and two lengths
+This document keeps the handshake, key derivation (including the §3.5 broadcast key), and the GATT envelope. Packet layout, decrypt parameters, and the electrical fields are defined on that page.
 
-External secure phase **`step`** (Section 5) determines **Manufacturer Specific Data** shape:
-
-| Condition | Manufacturer data length | Description |
-|------|----------------|------|
-| `step = 0` (waiting for `ble-crypto-jpake-round1`) | **5 bytes** | Short format: plaintext discriminator and provisioning state for scan discovery |
-| `step ≠ 0` | **26 bytes** | Long format: AES-128-CCM ciphertext + tag; can rotate multiple measurement channels |
-
-Under dynamic long packets, advertising interval may be on the order of **200 ms**; after a long packet is successfully on-air, the device may rotate **phase slots** per product policy (phase count is model-dependent; integrators should validate on hardware).
-
-### 9.2 Short format (5 bytes)
-
-Multi-byte integers are **little-endian**.
-
-| Offset | Length | Content |
-|------|------|------|
-| 0–1 | 2 | Fixed `0xFF 0xFF` (common manufacturer prefix) |
-| 2 | 1 | **Provisioning state byte**: whole byte **`0`** = still waiting for J-PAKE round 1; **`1`** = entered later phases (unrelated to long-format control byte high nibble) |
-| 3–4 | 2 | **12-bit discriminator** (only low 12 bits of 16-bit field valid): from device **SN** (12 hex digits → 48 bits), take **top 12 bits** (leftmost 3 hex digits of the string) as discriminator for scan-side device identification |
-
-### 9.3 Long format (26 bytes, AES-128-CCM)
-
-Entire block is **one manufacturer custom data** entry in advertising (26 bytes total).
-
-| Offset | Length | Content |
-|------|------|------|
-| 0–1 | 2 | Fixed `0xFF 0xFF` |
-| 2 | 1 | **Control byte** (see below): bit7 whether application GATT provisioning service is installed (1=installed); bit6–4 encoding version (0–7, currently **1**, matching **§9.3.1** plaintext); bit3–2 **phase/circuit index**; bit1–0 **product category** |
-| 3–6 | 4 | **Broadcast counter**: 32-bit unsigned, **little-endian**, increments per successful publish |
-| 7–21 | 15 | **CCM ciphertext**: decrypts to the 15-byte plaintext in **§9.3.1** (same length as ciphertext) |
-| 22–25 | 4 | **CCM authentication tag** (4 bytes) |
-
-**Control byte bits 1–0 (product category)**
-
-| Value | Models |
-|------|------|
-| `0b11` (3) | Three-phase: `SDM01_3PN` / `SPM02` |
-| `0b10` (2) | Two-circuit: `SDM02` |
-| `0b01` (1) | Single-phase: `SDM01_1PN` / `SPM01` |
-| `0b00` (0) | Other (including `SRS01A` / `SRS01B`) |
-
-**CCM parameters (unlike GATT business envelope)**
-
-- **Key**: **broadcast key** (§3.5.1), 16 bytes; matches **§3.5.2** persisted broadcast key; **no** current GATT session or session nonce exchange required.
-- **Nonce (12 bytes)**: **Not** BLE session `device_nonce` (passive scan may never connect or exchange session nonce). Fixed **first 8 bytes all `0x00`**, last 4 bytes are **big-endian** `uint32_t` of the **same broadcast counter** as bytes 3–6 in the table (little-endian in AD; integrators must convert byte order for the same numeric value).
-- **Plaintext length**: 15 bytes; **no AAD**; **tag length** 4 bytes.
-
-Notation: `nonce_12 = 0^8 || BE32(counter)`, `counter` equals little-endian value at AD offset 3–6.
-
-**Who can decrypt**: Must hold **broadcast key** consistent with device **§3.5.2** persistence, read **little-endian counter** from broadcast AD, assemble nonce above; decryption works **without connection**. Broadcast key HKDF happens at **first J-PAKE success**; **commit timing** matches LTK (after Wi‑Fi association success), independent of later BLE connections.
-
-### 9.3.1 Long-format plaintext (15 bytes after decrypt, AD offsets 7–21)
-
-Successful CCM decrypt yields a **fixed 15-byte binary** payload, **not JSON**. Multi-byte integers are **little-endian**. This layout applies when the encoding version (control byte bits 6–4) is **1**.
-
-| Plaintext offset | Length | Type | Scale | Quantity | Unit |
-|----------|------|------|------|--------|------|
-| 0–1 | 2 | unsigned `uint16` | ÷10 | Voltage `V` | V |
-| 2–3 | 2 | unsigned `uint16` | ÷100 | Current `I` | A |
-| 4–6 | 3 | signed `int24` | ÷1000 | Active power `P` | kW |
-| 7–10 | 4 | unsigned `uint32` | ÷100 | Import active energy `FE` | kWh |
-| 11–14 | 4 | unsigned `uint32` | ÷100 | Export active energy `RE` | kWh |
-
-Physical value = integer field ÷ scale. Example: voltage raw `0x08FC` (LE `FC 08`) → `2300 / 10 = 230.0` V.
-
-**Signed little-endian `int24`**: assemble `b0 | (b1<<8) | (b2<<16)` as 24 bits; if the high bit (`b2` bit7) is 1, treat as negative (equivalent to subtracting `0x1000000`). Power may be negative (generation / reverse).
-
-**Saturation and invalid values**
-
-- Non-finite source measurements encode as **0**.
-- `uint16` saturates at `0…65535` (voltage up to about 6553.5 V, current up to about 655.35 A).
-- `int24` saturates at `−0x800000…0x7FFFFF` (power about −8388.608…8388.607 kW).
-
-**Phase/circuit index (control byte bits 3–2)** selects which channel this packet’s plaintext belongs to; the device rotates the index after a long packet is on-air. Single-channel models keep this field at `0`.
-
-| Product category | Slot count | Index `0` | Index `1` | Index `2` |
-|----------|--------|----------|----------|----------|
-| `0b01` single-phase | 1 | The only circuit | — | — |
-| `0b00` and `SRS01A` | 1 | The only circuit | — | — |
-| `0b00` and `SRS01B` | 2 | Circuit 1 | Circuit 2 | — |
-| `0b10` `SDM02` | 2 | Circuit 1 | Circuit 2 | — |
-| `0b11` three-phase | 3 | Phase A | Phase B | Phase C |
-
-**Model differences**
-
-- `SRS01A` / `SRS01B` **do not advertise export energy**: the four `RE` bytes are always `0`.
-- Unrecognized models: all 15 plaintext bytes are `0`.
-- Units match read-characteristic short keys `V` / `I` / `P` / `FE` / `RE`; advertising is fixed-point binary, the read characteristic uses decimal strings. For the read-characteristic JSON see [Business Command Reference §5](../ble-common/ble-business-api.en.md#5-snapshot-read-ip-and-electrical-readings).
-
-### 9.4 GATT and advertising UUID when Wi‑Fi is connected
-
-On devices **with this secure channel enabled**, if the user does **not** explicitly require “keep BLE after provisioning”:
-
-- When **Wi‑Fi station mode is connected**, the device may remove **application Service UUID** from advertising, stop exposing application **GATT** services, and keep only manufacturer data in advertising to reduce attack surface.
-
-If **Wi‑Fi configuration API** (see [Business Command Reference §2.2](../ble-common/ble-business-api.en.md#22-send-ssid-and-password)) includes **`enableble`** parsed as **on**, the device **persists** that preference (**same storage partition and fixed-length text style as long-term key LTK**; convention **`1`** = on, **`0`** = off, remainder zero-padded). On next boot, if read as **on**, **even with Wi‑Fi connected**, application **GATT** and advertising **Service UUID** remain, and **dynamic manufacturer data** per this section continues.
-
-**Factory reset** typically clears this preference together with LTK and other security configuration; see vendor documentation.
 
 ## 10. Failure Conditions
 

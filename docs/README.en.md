@@ -23,7 +23,8 @@
    - Plaintext: [ble-plaintext/ble-plaintext-api.en.md](ble-plaintext/ble-plaintext-api.en.md)
    - Secured: [ble-secured/ble-secured-api.en.md](ble-secured/ble-secured-api.en.md)
 3. Read the **business layer** (which commands to send and which fields to read; shared by every channel): [ble-common/ble-business-api.en.md](ble-common/ble-business-api.en.md).
-4. Only when implementing the secured channel: [protocol reference](ble-secured/crypto-protocol.en.md) (J-PAKE / ZKP binary layout, advertising manufacturer data).
+4. Electrical values from advertising, with no connection: [Encrypted business advertising](ble-secured/ble-advertising.en.md).
+5. Only when implementing the handshake yourself: [protocol reference](ble-secured/crypto-protocol.en.md) (J-PAKE / ZKP binary layout, key derivation, GATT envelope).
 
 ## Hand the documentation to an AI
 

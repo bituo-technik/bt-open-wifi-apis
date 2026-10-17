@@ -1,6 +1,6 @@
 # Error Code Reference
 
-> Status: first release | Applies to: all branches, all channels | Based on the firmware source `userApiErrorCodes.h` and the configuration subcode table
+> Status: first release | Applies to: all branches, all channels | Based on the device error-code table and the configuration subcodes
 
 ## 1. How to read `code`
 

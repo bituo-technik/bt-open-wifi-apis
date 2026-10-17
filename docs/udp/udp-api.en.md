@@ -1,6 +1,6 @@
 # UDP Report
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (for who gets the AES-encrypted datagram see [Section 4](#4-aes-ccm-encrypted-datagram)) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (for who gets the AES-encrypted datagram see [Section 4](#4-aes-ccm-encrypted-datagram)) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19
 
 UDP report is **pushed by the device**: you give the meter an IP and a port, and it sends the telemetry JSON there as a UDP datagram at a fixed period. There is no connection and no handshake, so latency is low and implementation is simple. It fits scenarios that need power readings quickly, such as PV export limiting and dynamic load balancing.
 
@@ -65,7 +65,7 @@ With `commonmode` on, the datagram follows the generic format; see Section 6 of 
 
 ## 4. AES-CCM encrypted datagram
 
-> Scope: in the source, only the **secured builds** of SDMV2 (C3 / C6) have this feature, and it takes effect only while the **HTTPS switch** (`enablehttps`) is on. SXM builds (Basic, Lite) always send plaintext. The online documentation says Lite supports it too, which does not match the source and needs firmware confirmation; see the [CHANGELOG](../../CHANGELOG.en.md).
+> Scope: the encrypted datagram is sent only on Pro, and only while HTTPS (`enablehttps`) is on. Basic and Lite always send plaintext. Published notes that say Lite supports it do not match Pro `3.1.19` and Lite `5.1.16`. See the [CHANGELOG](../../CHANGELOG.en.md).
 
 When it is on, the datagram is no longer the telemetry JSON but a ciphertext JSON:
 

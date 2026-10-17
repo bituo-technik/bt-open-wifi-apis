@@ -9,7 +9,7 @@ Over BLE you can: **establish an application-layer secure session**, **provision
 
 For system integrators, DIY developers, and AI coding assistants. Command names, field names, and device `msg` strings stay in English exactly as the device returns them.
 
-> **How the docs are split:** this page covers the **transport layer** of the secured channel — UUIDs, handshake, key-derivation summary, encrypted envelope, reconnect. Provisioning commands, device commands, snapshot fields and business error codes are in the [Business Command Reference (shared by plaintext and secured)](../ble-common/ble-business-api.en.md); the decrypted business JSON is **identical** to the plaintext channel and maintained only once. The J-PAKE / ZKP binary layout and advertising manufacturer-data details are in the [protocol reference](crypto-protocol.en.md); **if the documents disagree, the protocol reference wins**.
+> **How the docs are split:** this page covers the **transport layer** of the secured channel — UUIDs, handshake, key-derivation summary, encrypted envelope, reconnect. Provisioning commands, device commands, snapshot fields and business error codes are in the [Business Command Reference (shared by plaintext and secured)](../ble-common/ble-business-api.en.md); the decrypted business JSON is **identical** to the plaintext channel and maintained only once. The J-PAKE / ZKP binary layout is in the [protocol reference](crypto-protocol.en.md); **if the handshake or the envelope disagrees, the protocol reference wins**. Values read from advertising without a connection are in [Encrypted business advertising](ble-advertising.en.md).
 
 Overview: [SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview) (BLE Secured applies to Lite/Pro).
 
@@ -21,7 +21,7 @@ Minimal loop: **connect → subscribe notify → secure handshake → encrypted 
 
 | Item | Value |
 |------|-------|
-| Advertised name | `<model>-<serial>`, e.g. `SDM01_3PN-10304B0D7760`; filter prefixes `SDM` / `SPM` / `SXM` |
+| Advertised name | `<model>-<serial>`, e.g. `SDM01_3PN-10304B0D7760`; filter prefixes `SDM` / `SPM` |
 | Service | `0xA003` |
 | Write | `0xC313` |
 | Read snapshot | `0xC314` |
@@ -104,7 +104,7 @@ After the AI generates code, self-test with the [9.3 acceptance checklist](#93-a
 
 Use it when both hold:
 
-- the advertised name starts with `SDM` / `SPM` / `SXM`;  
+- the advertised name starts with `SDM` / `SPM`;  
 - the GATT service `A003` is present.
 
 Do **not** use it when:
@@ -273,7 +273,7 @@ wait 4 s → rescan for the same name → connect → subscribe C315 → ble-cry
 → at most ~12 retries
 ```
 
-After `wifi` succeeds BLE normally stays connected so you can read the IP. **Once Wi-Fi is connected the device by default withdraws the application GATT and the service UUID from advertising** (smaller attack surface). To keep BLE usable after provisioning, include `enableble:true` in the `wifi` command; see [Business Command Reference §2.2](../ble-common/ble-business-api.en.md#22-send-ssid-and-password) and [protocol reference §9.4](crypto-protocol.en.md#94-gatt-and-advertising-uuid-when-wifi-is-connected).
+After `wifi` succeeds BLE normally stays connected so you can read the IP. **Once Wi-Fi is connected the device by default withdraws the application GATT and the service UUID from advertising** (smaller attack surface). To keep BLE usable after provisioning, include `enableble:true` in the `wifi` command; see [Business Command Reference §2.2](../ble-common/ble-business-api.en.md#22-send-ssid-and-password) and [Encrypted business advertising §5](ble-advertising.en.md#5-advertising-and-gatt-when-wi-fi-is-connected).
 
 ### 4.11 Common pitfalls
 
@@ -479,4 +479,4 @@ Appendix A (less common error codes), B (`functionMap` bits) and C (`model` shor
 
 ## Appendix D Advertising manufacturer data (optional)
 
-Secured firmware can put a short packet (5 bytes, step=0) or a long packet (26 bytes, AES-128-CCM, tag=4, key = broadcast_key) in advertising. The GATT business envelope and the advertising CCM use **different parameters**. The long packet decrypts to 15 bytes of plaintext (voltage, current, power, energy, etc. as fixed-point binary); the layout is in [protocol reference, Section 9](crypto-protocol.en.md#9-ble-advertising-manufacturer-data-dynamic-advertising). If you only need provisioning and read/write characteristics you can skip advertising decryption; see the "Broadcast" tab of the Windows tool for a working example.
+To read electrical values from advertising without a GATT connection, see [Encrypted business advertising](ble-advertising.en.md). The GATT envelope and the advertising AES-CCM do not share parameters. Skip that page if you only provision and use the characteristics.

@@ -18,8 +18,7 @@
   },
   "namePrefixes": [
     "SDM",
-    "SPM",
-    "SXM"
+    "SPM"
   ],
   "advertisedName": "<model>-<serial>",
   "flow": [

@@ -1,6 +1,6 @@
 # Modbus TCP
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (Modbus TCP over TLS only on Basic+ and Pro) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`; map identical to the Gitbook "Modbus TCP Map - ESP32-8685"
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (Modbus TCP over TLS only on Basic+ and Pro) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19; map identical to the Gitbook "Modbus TCP Map - ESP32-8685"
 
 Modbus TCP is the most common way for PLCs, industrial gateways and EMS to read the meter. The device is a **Modbus TCP server (slave)** on port **502**: you poll it and read the electrical values from fixed registers. It does not push anything by itself.
 
@@ -39,7 +39,7 @@ Connection behavior of the firmware:
 - A frame whose declared length does not match is dropped **without a response**; the client sees a timeout.
 - Recommended minimum interval between two requests: **150 ms**. Polling faster than about once per second is normally unnecessary for energy data.
 
-> The Gitbook page says the device accepts only one connection and resets the socket after every read, and asks you to reconnect for every request. The firmware source does not do that: it keeps the connection. Reconnecting for every request still works and is the safest choice for simple clients, so the recommendation stays compatible. See the CHANGELOG entry for this discrepancy.
+> The Gitbook page says the device accepts only one connection and resets the socket after every read, and asks you to reconnect for every request. The meter keeps the connection. Reconnecting for every request still works and is the safest choice for simple clients, so the recommendation stays compatible. See the CHANGELOG entry for this discrepancy.
 
 ### 2.2 Modbus TCP over TLS
 
@@ -64,7 +64,7 @@ Exception responses:
 
 ## 4. Register map
 
-The map below is for the default report mode `commonmode = 0`. When the device is switched to the generic format (`commonmode = 1`, see the Business Command Reference), the Modbus read map is switched to a different layout and the tables below **do not apply**. The device also has `mda` / `minvert` commands (SXM and SDMV2 firmware) that remap register addresses or swap bytes for custom integrations; they are not covered here, and `mda` also sets `commonmode` back to 0 and turns Modbus TCP on. The factory layout is the one below.
+The map below is for the default report mode `commonmode = 0`. When the device is switched to the generic format (`commonmode = 1`, see the Business Command Reference), the Modbus read map is switched to a different layout and the tables below **do not apply**. The device also has `mda` / `minvert` commands that remap register addresses or swap bytes for custom integrations. They are not covered here. `mda` also sets `commonmode` back to 0 and turns Modbus TCP on. The factory layout is the one below.
 
 ### 4.1 Product identification (base address 978)
 
@@ -193,7 +193,7 @@ Write with function code `0x06`. These registers are **outside** the read window
 - Locate blinks the LED (about 15 seconds according to the Gitbook page) so you can find the physical meter in a crowded panel; it does the same as the `location` command.
 - **Reset energy is irreversible.** It is the same as the `zero` command.
 
-> The Gitbook page lists the locate register at **10000** (`0x2710`). In the firmware source the Wi-Fi module does not handle 10000 over Modbus TCP: locate is at **10002** (`0x2712`). 10000 is the address of the same function on the meter-side MCU, which probably explains the page. Reset energy at 10001 is the same in both. This page follows the source. Please confirm on a device; the CHANGELOG records the item.
+> The published page lists the locate register at **10000** (`0x2710`). Over Modbus TCP the Wi-Fi module does not handle 10000: locate is at **10002** (`0x2712`). 10000 is the address of the same function on the meter-side MCU. Reset energy at 10001 is the same in both. Please confirm on a device; the CHANGELOG records the item.
 
 ## 6. Examples
 

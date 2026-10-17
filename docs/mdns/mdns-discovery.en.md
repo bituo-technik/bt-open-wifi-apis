@@ -1,6 +1,6 @@
 # mDNS Discovery
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19` and the Gitbook "mDNS Discovery" page
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19 and the Gitbook "mDNS Discovery" page
 
 After the meter joins your Wi-Fi network it announces itself over mDNS (Multicast DNS). A gateway, EMS or app on the same subnet can then find the IP address of every meter **without a static IP and without scanning**, and go on to use [Modbus TCP](../modbus-tcp/modbus-tcp-api.en.md), [HTTP](../http/http-api.en.md), [WebSocket](../websocket/websocket-api.en.md) or [UDP](../udp/udp-api.en.md).
 
@@ -36,9 +36,9 @@ Variant by firmware family:
 
 | Firmware | Variant | Example |
 |----------|---------|---------|
-| SXM (Basic / Lite): SDM01_3PN and SDM01_1PN | `_01` | `EnergySensor-SDM01_3PN_01-45705E597760` |
-| SXM (Basic / Lite): other models such as SPM02, SDM02 | none | `EnergySensor-SPM02-45705E597760` |
-| SDMV2 (Basic+ / Pro) | `_02` | `EnergySensor-SDM01_3PN_02-45705E597760` |
+| Basic / Lite: SDM01_3PN and SDM01_1PN | `_01` | `EnergySensor-SDM01_3PN_01-45705E597760` |
+| Basic / Lite: other models such as SPM02, SDM02 | none | `EnergySensor-SPM02-45705E597760` |
+| Basic+ / Pro | `_02` | `EnergySensor-SDM01_3PN_02-45705E597760` |
 
 Customer-customized builds may use a different name instead of the model.
 

@@ -179,8 +179,8 @@ TP_NAMES: dict[int, str] = {
     3: "三相（SPM02）",
     4: "三相（SDM01_3PN）",
     5: "两路（SDM02）",
-    8: "SDMV2",
-    9: "SDMV2S3 / H2",
+    8: "SDM01 Gen2",
+    9: "其它",
 }
 
 METER_FIELDS: list[tuple[str, str]] = [

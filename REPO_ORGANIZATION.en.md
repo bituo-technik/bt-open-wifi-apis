@@ -4,7 +4,7 @@
 
 > Notes for people, and working rules for AI.  
 > Published entry point: [SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview)  
-> Document version: 2026-10. Status: first complete pass. Plaintext and secured BLE are in place, and so are the Wi-Fi overview, mDNS, Modbus TCP, HTTP, WebSocket, MQTT, UDP, telemetry format, and error codes. They were checked against firmware source; differences are listed under "Open points" in the [CHANGELOG](CHANGELOG.en.md).
+> Document version: 2026-10. Status: first complete pass. Plaintext and secured BLE are in place, and so are the Wi-Fi overview, mDNS, Modbus TCP, HTTP, WebSocket, MQTT, UDP, telemetry format, and error codes. Differences are listed under "Open points" in the [CHANGELOG](CHANGELOG.en.md).
 
 ---
 
@@ -13,9 +13,9 @@
 | Question | Answer |
 |----------|--------|
 | One repository per API? | **No.** One repository, one directory per channel. |
-| Public or private? | **Private** (`bituo-technik/bt-open-wifi-apis`). Partners get access when invited. It is not open to everyone. |
+| Public or private? | **Public** (`bituo-technik/bt-open-wifi-apis`). The readers are system integrators and DIY builders. |
 | What goes in? | Integrator-facing API docs (Chinese and English), demo tools, and machine-readable `spec/`. |
-| What stays out? | ESP32 **firmware source**, production keys, and any real device's PIN / LTK / client cache file. |
+| What stays out? | Firmware, production keys, and any real device's PIN / LTK / client cache file. |
 | Both BLE channels share one business JSON. How do we maintain that? | **One shared document** in `docs/ble-common/`. Each channel document describes only its own transport. See §3. |
 | How does this relate to Gitbook? | This repo is the source of truth. Gitbook is the publishing surface: paste a generated page from `dist/`, or sync from `docs/SUMMARY.md`. |
 | How are firmware branches represented? | As a matrix (Basic / Basic+ / Lite / Pro). Do not split the repo by branch. |
@@ -36,14 +36,12 @@ Capabilities follow the **firmware branch**:
 
 Docs and tools must say whether a branch supports a feature. Do not assume every device has every API.
 
-### Boundary with the firmware repository
+### Relationship to the published site
 
 ```text
-[private] ESP firmware repo     ← implementation, NVS, build, production
-            ↑ compare locally in a second window; no submodule, no copied source
-[private] bt-open-wifi-apis    ← protocol docs + demo tools + spec
-            ↓ copy / sync
-[published] docs.bituo-technik.com
+bt-open-wifi-apis          ← protocol docs + demo tools + spec (public)
+        ↓ copy / sync
+docs.bituo-technik.com
 ```
 
 ---
@@ -158,18 +156,18 @@ Tools must match the documented protocol. The UI may be Chinese or English. On-d
 
 ---
 
-## 6. Private repository and access
+## 6. What is public
 
-- Default branch `main`. Partners get **read-only** access as a GitHub Team member or outside collaborator. Do not grant write access.  
+- Default branch `main`. The repository is public so integrators and DIY builders can read and clone it.  
 - Local caches such as `tools/ble-secured/ble_crypto_client_cache.json` are in `.gitignore` and **must not be committed**.  
-- Do not paste the repository URL into a public issue or forum. External delivery is a single file from `dist/`, or a Gitbook page.  
-- Before any future public release, walk through the checklist in §7, especially whether the secured protocol reference is allowed to be public.
+- Published pages follow `docs/` in this repo. Sync Gitbook from here; do not edit only the live site.  
+- The crypto protocol and business advertising are part of the integration interface and may be public. Real-device keys, PINs, and LTK caches may not.
 
 ---
 
 ## 7. Maintainer checklist
 
-- [ ] The repo contains no firmware source, keys, real-device PIN / LTK, or cache files  
+- [ ] The repo contains no firmware, keys, real-device PIN / LTK, or cache files, and no internal build codenames  
 - [ ] `docs/ble-common` and `spec/ble-plain-api.json` list the same commands  
 - [ ] Chinese and English documents match in outline and content (`scripts/check_docs.py` checks heading counts and links)  
 - [ ] Entry pages (READMEs, this document, CHANGELOG, AGENTS) are updated in both languages  
@@ -179,14 +177,14 @@ Tools must match the documented protocol. The UI may be Chinese or English. On-d
 
 ### Comparing with local firmware (optional)
 
-To check protocol behavior: search the firmware repo for the `cmd` string or the UUID, then write the conclusion back into the API docs. Do not generate firmware from the docs, and do not copy firmware source into this repo.
+When behavior is uncertain, check it on a device or with a firmware colleague, then write the conclusion back into the API docs. Do not copy firmware into this repo.
 
 ---
 
 ## 8. Suggested order of work
 
 1. ~~Plaintext BLE~~ and ~~secured BLE~~ are migrated  
-2. ~~MQTT, HTTP, mDNS, Modbus TCP, WebSocket, UDP, overview, telemetry format, and error codes~~ have a first version written from firmware source  
+2. ~~MQTT, HTTP, mDNS, Modbus TCP, WebSocket, UDP, overview, telemetry format, and error codes~~ have a first version
 3. Confirm the CHANGELOG "Open points" on a real device (locate register, Modbus connection behavior, which branches get UDP AES, and the rest), then update the docs  
 4. When needed, turn on Gitbook Git Sync (project directory `docs/`, contents from `docs/SUMMARY.md`) and point the old published pages at this repo's version  
 5. When the relay (SRS) product line is added, open `docs/srs/` and matching `spec/` entries. Do not mix them into the existing meter pages  

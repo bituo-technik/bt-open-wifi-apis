@@ -4,7 +4,7 @@
 
 Coding tools load [`AGENTS.md`](AGENTS.md) automatically. This file is the English text of the same rules. If the two disagree, follow `AGENTS.md`.
 
-You are using or maintaining the **external API documentation repository for Bituo SPM / SDM / SXM Open Wi-Fi devices**. There are two kinds of task:
+You are using or maintaining the **external API documentation repository for Bituo SPM / SDM Open Wi-Fi devices**. The readers are system integrators and DIY builders. There are two kinds of task:
 
 - **A. Help a user write their own app from these docs** (BLE provisioning, LAN or cloud reads, device configuration).
 - **B. Help a maintainer change the docs or the tools.**
@@ -38,7 +38,7 @@ For Chinese, replace `en` with `zh-CN`. Hard rules for Wi-Fi channels:
 | Device | Read, in order | Or one file |
 |--------|----------------|-------------|
 | Plaintext BLE (Basic / Basic+, `A002`) | `docs/ble-plaintext/ble-plaintext-api.en.md` → `docs/ble-common/ble-business-api.en.md` | `dist/ble-plaintext.complete.en.md` (generate with `py -3 scripts/build_bundles.py`) |
-| Secured BLE (Lite / Pro, `A003`) | `docs/ble-secured/ble-secured-api.en.md` → `docs/ble-common/ble-business-api.en.md` → `docs/ble-secured/crypto-protocol.en.md` | `dist/ble-secured.complete.en.md` |
+| Secured BLE (Lite / Pro, `A003`) | `docs/ble-secured/ble-secured-api.en.md` → `docs/ble-common/ble-business-api.en.md` → `docs/ble-secured/ble-advertising.en.md` only when reading values from advertising; `docs/ble-secured/crypto-protocol.en.md` for the handshake byte layout | `dist/ble-secured.complete.en.md` |
 
 For Chinese, replace `en` with `zh-CN`. Machine-readable manifests are in `spec/`: `ble-business-commands.json` (commands and fields), `ble-plain-api.json` / `ble-secured-api.json` (transport), `ble-secured-test-vectors.json` (known-answer crypto vectors).
 
@@ -63,7 +63,7 @@ Scan → connect → subscribe to notifications → (plaintext: `pass`; secured:
 1. [`REPO_ORGANIZATION.en.md`](REPO_ORGANIZATION.en.md): layout and the **shared business document** rule (§3). Entry pages are a language choice; the body is `.zh-CN.md` / `.en.md`.
 2. A business-command change goes **only** into `docs/ble-common/*` (Chinese and English together) plus `spec/ble-business-commands.json`. Do not copy the command table back into a channel document.
 3. A transport change goes only into `docs/ble-plaintext` or `docs/ble-secured` (Chinese and English together, same section numbers).
-3a. A Wi-Fi channel change (`docs/{mdns,modbus-tcp,http,websocket,mqtt,udp}`) updates Chinese and English together. Fields change only in `docs/reference/telemetry-payload.*`. Error codes change only in `docs/reference/error-codes.*` (and `spec/error-codes.json`). Modbus registers change in `spec/modbus-tcp-map.json` and in both documents' tables (`check_docs.py` compares every address). The "Source" line at the top of a channel document names the firmware version that was checked. When firmware behavior disagrees with the published Gitbook, firmware source wins, and the difference is recorded under "Open points" in both `CHANGELOG.zh-CN.md` and `CHANGELOG.en.md`.
+3a. A Wi-Fi channel change (`docs/{mdns,modbus-tcp,http,websocket,mqtt,udp}`) updates Chinese and English together. Fields change only in `docs/reference/telemetry-payload.*`. Error codes change only in `docs/reference/error-codes.*` (and `spec/error-codes.json`). Modbus registers change in `spec/modbus-tcp-map.json` and in both documents' tables (`check_docs.py` compares every address). The firmware-version line at the top of a channel document names the versions that were checked. When behavior disagrees with a published page, record it under "Open points" in both `CHANGELOG.zh-CN.md` and `CHANGELOG.en.md`, and write the page from what the device does.
 3b. An entry-page change (root `README`, `docs/README`, `tools/**/README`, `REPO_ORGANIZATION`, `CHANGELOG`, `AGENTS`) updates both languages. Do not shrink `AGENTS.md` to a page that only links to the two languages.
 4. After editing `tools/ble-secured/web-ble-secured-console.html` or `ble_secured_crypto.js`, run `py -3 tools/ble-secured/bundle_offline_html.py` to regenerate `*.offline.html` (do not hand-edit the generated file).
 5. Before committing, run:
@@ -77,7 +77,7 @@ node scripts/check_test_vectors.mjs
 After editing `tools/lan/*.py`, at least run `py -3 -m py_compile tools/lan/*.py` and exercise the matching tool against `mock_device.py` (see [`tools/lan/README.en.md`](tools/lan/README.en.md)).
 
 6. Record the change in both `CHANGELOG.zh-CN.md` and `CHANGELOG.en.md`, and name the firmware version it was checked against. `CHANGELOG.md` is only the language-choice page.
-7. **Do not commit:** `tools/ble-secured/ble_crypto_client_cache.json`, a real-device PIN / LTK / key, or firmware source. Keep the firmware repo open beside this one for comparison. Do not copy it in.
+7. **Do not commit:** `tools/ble-secured/ble_crypto_client_cache.json`, a real-device PIN / LTK / key, or firmware. Do not put internal build codenames into the docs.
 8. When a fact is uncertain (firmware behavior, model differences), ask the user or record it under "Open points" in the CHANGELOG. **Do not** leave a `TBD` or similar placeholder in a customer-facing document.
 
 ## Terms

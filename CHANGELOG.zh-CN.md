@@ -4,6 +4,14 @@
 
 按日期倒序。「对齐固件」写明文档 / 工具核对过的固件版本。
 
+## 2026-10-17 — 按公开仓库整理用词
+
+### 文档
+
+- 产品系列只写 SPM / SDM，不再使用内部研发统称。文档对应固件版本写 Basic / Lite 5.1.16、Basic+ 1.2.12、Pro 3.1.19。
+- 仓库按公开来写：读者是系统集成商和 DIY 用户。删掉了一处不该对外的内部备注。
+- 业务加密广播从 GATT 接口说明和加密协议里拆出，单独成篇 `docs/ble-secured/ble-advertising.*`。
+
 ## 2026-10-17 — 入口文档拆成中英两份
 
 ### 文档
@@ -15,7 +23,7 @@
 
 ## 2026-10-07 — 初版补全：Wi-Fi 侧全部通道
 
-**对齐固件：** 源码快照 SXM_EW_C3 `5.1.16`、SDMV2_EW_C3 `1.2.12`、SDMV2_EW_C6 `3.1.19`；线上 Gitbook 的 Overview / MQTT / mDNS / Modbus TCP 页面（2026-05 ~ 2026-06 版本）。固件分支与源码的对应关系（Basic = SXM 无加密，Lite = SXM + `BLE_APP_CRYPTO_ENABLE`，Basic+ = SDMV2 C3，Pro = SDMV2 C6）由源码和版本号推断，不是官方对照表。
+**对齐固件：** Basic / Lite `5.1.16`、Basic+ `1.2.12`、Pro `3.1.19`；并对照过线上 Gitbook 的 Overview / MQTT / mDNS / Modbus TCP 页面（2026-05 ~ 2026-06 版本）。
 
 ### 文档
 
@@ -32,16 +40,16 @@
 
 ### 待确认
 
-文档以固件源码为准，请用真机或固件同事核实后更新。
+请用真机或固件同事核实后更新。
 
-1. **Modbus 定位寄存器**：Gitbook 写 `10000 (0x2710)`；源码里 Wi-Fi 模块通过 Modbus TCP 只处理 `10001`（清零）和 `10002`（定位），`10000` 是表侧 MCU 上同一功能的地址。
-2. **Modbus 连接行为**：Gitbook 写「只支持 1 个连接、每次读后复位 socket、必须每次重连」；源码是 Basic / Lite / Pro 最多 2 个、Basic+ 最多 1 个，连接保持，空闲 30 秒（定制固件 12 秒）断开，一次只应答最新一帧。文档保留了「每次重连也可用」的建议。
-3. **Modbus 寄存器 994（RSSI）**：Gitbook 写负的 dBm；源码写入 `-rssi` 到无符号寄存器，读到的是绝对值（如 68）。Gitbook 里 MCU 版本 / Wi-Fi 固件版本的示例也写反了（989 是 MCU，997 是 Wi-Fi 固件）。
-4. **`commonmode = 1`**：源码里 Modbus 读取映射和遥测格式都会随之切换，文档只描述默认布局（`commonmode = 0`），通用格式的寄存器布局未写入；`mda` / `minvert` 只在 SXM / SDMV2 固件存在，文档仅提及。
-5. **UDP AES-CCM 适用分支**：Overview 矩阵写 Lite、Pro 都支持；源码里只有 SDMV2 加密构建（Pro）、且 HTTPS 打开时才发密文，SXM（Lite）始终是明文。矩阵保持线上版本并加了脚注。
-6. **mDNS 主机名**：Gitbook 说 `VARIANT` 反映 HTTP 实现差异；源码里 `_01` = SXM 的 SDM01_3PN / SDM01_1PN，`_02` = SDMV2，其它 SXM 型号没有变体字段（已在局域网真机上看到 `EnergySensor-SPM02-<MAC>`）。主机名就是可改的设备名称（`deviceName`），改名后前缀过滤会失效，文档已说明。
-7. **MQTT 默认上报间隔**：源码 5 秒，线上文档写 30 秒；文档提示以设备 `MI` 为准。
-8. **`TP`**：源码里它是型号代码（SDM01 Gen2 恒为 8），不是相数；此前线上「1 = 单相、3 = 三相」只对 SPM01 / SPM02 成立。
+1. **Modbus 定位寄存器**：Gitbook 写 `10000 (0x2710)`；设备上 Wi-Fi 模块通过 Modbus TCP 只处理 `10001`（清零）和 `10002`（定位），`10000` 是表侧 MCU 上同一功能的地址。
+2. **Modbus 连接行为**：Gitbook 写「只支持 1 个连接、每次读后复位 socket、必须每次重连」；设备上 Basic / Lite / Pro 最多 2 个、Basic+ 最多 1 个，连接保持，空闲 30 秒（定制固件 12 秒）断开，一次只应答最新一帧。文档保留了「每次重连也可用」的建议。
+3. **Modbus 寄存器 994（RSSI）**：Gitbook 写负的 dBm；设备把 `-rssi` 写入无符号寄存器，读到的是绝对值（如 68）。Gitbook 里 MCU 版本 / Wi-Fi 固件版本的示例也写反了（989 是 MCU，997 是 Wi-Fi 固件）。
+4. **`commonmode = 1`**：切到这个值后，Modbus 读取映射和遥测格式都会变。文档只描述默认布局（`commonmode = 0`），通用格式的寄存器布局未写入；`mda` / `minvert` 仅提及。
+5. **UDP AES-CCM 适用分支**：已发布的矩阵写 Lite、Pro 都支持。Lite `5.1.16` 始终发明文；加密报文只在 Pro 且 HTTPS 打开时出现。矩阵保留线上说法并加了脚注。
+6. **mDNS 主机名**：已发布页面说 `VARIANT` 反映 HTTP 实现差异。实际是 Basic / Lite 的 SDM01_3PN、SDM01_1PN 用 `_01`，Basic+ / Pro 用 `_02`，其它 Basic / Lite 型号没有变体字段。主机名就是可改的设备名称（`deviceName`），改名后前缀过滤会失效，文档已说明。
+7. **MQTT 默认上报间隔**：设备默认 5 秒，线上文档写 30 秒；文档提示以设备 `MI` 为准。
+8. **`TP`**：它实际是型号代码（SDM01 Gen2 恒为 8），不是相数；此前线上「1 = 单相、3 = 三相」只对 SPM01 / SPM02 成立。
 9. **`/uploadcefile`** 的参数顺序、首尾各丢一个字符等行为很别扭，文档如实记录并推荐 `/upload` 或 BLE `cafilestart`。
 10. Modbus TLS 连接的空闲超时、`mqtt_monitor.py` 对真实 Broker 的行为尚未验证。
 
@@ -53,7 +61,7 @@
 
 ### 安全提示
 
-- 固件源码里有默认的 MQTT 测试 Broker 与账号。这些**没有**抄进任何文档、示例或工具；建议确认发布版本里是否仍然保留。
+- 文档、示例和工具里不要写入测试用的 Broker 地址或账号。
 
 ## 2026-10-07 — 初始合并：BLE 明文 + BLE 加密
 
@@ -91,5 +99,5 @@
 - 明文工具（Windows GUI / 网页）的 Modbus 面板尚无校验位 / 停止位选择（固定 `parityStop=0`）。
 - 官方托管的网页地址与 Windows 工具下载地址（文档 §10 已留「发布后补充」）。
 - 写这条时，`docs/overview`、MQTT / HTTP / mDNS / WebSocket / UDP / Modbus TCP 文档尚未迁入。同日稍后的条目已经补上。
-- 名称前缀：文档写 `SDM` / `SPM` / `SXM`，两个网页还多接受 `SRS`（继电器产品线）；是否统一待产品确认。
+- 名称前缀：文档写 `SDM` / `SPM`，两个网页还多接受 `SRS`（继电器产品线）；是否统一待产品确认。
 - Pro 固件上 `enablehttps` 开启后 UDP 载荷为 `ct` / `tag` / `counter` 加密 JSON，其密钥与格式尚无对外文档。

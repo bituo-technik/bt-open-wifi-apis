@@ -1,6 +1,6 @@
 # UDP 上报
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（AES 加密报文的适用范围见 [4 节](#4-aes-ccm-加密报文)） ｜ 依据：固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（AES 加密报文的适用范围见 [4 节](#4-aes-ccm-加密报文)） ｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
 UDP 上报是**设备主动推**：你告诉电表一个 IP 和端口，电表就按固定周期把遥测 JSON 作为 UDP 报文发过去。没有连接、没有握手，延迟低、实现简单，适合光伏防逆流、动态负载均衡这类要快速拿到功率的场景。
 
@@ -65,7 +65,7 @@ UDP 上报是**设备主动推**：你告诉电表一个 IP 和端口，电表�
 
 ## 4. AES-CCM 加密报文
 
-> 范围：源码里，只有 SDMV2（C3 / C6）的**加密构建**才有这个功能，而且要**打开 HTTPS 开关**（`enablehttps`）才会启用。SXM 构建（Basic、Lite）始终发明文。线上文档写 Lite 也支持，与源码不符，需要固件确认，见 [CHANGELOG](../../CHANGELOG.zh-CN.md)。
+> 范围：加密报文只在 Pro，并且要打开 HTTPS（`enablehttps`）才会发。Basic 和 Lite 始终发明文。已发布的说明写 Lite 也支持，和 Pro `3.1.19`、Lite `5.1.16` 上看到的行为不一致，见 [CHANGELOG](../../CHANGELOG.zh-CN.md)。
 
 打开后，UDP 报文不再是遥测 JSON，而是一个密文 JSON：
 

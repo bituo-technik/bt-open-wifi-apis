@@ -1,6 +1,6 @@
 # HTTP / HTTPS API
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (HTTPS on Pro only) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (HTTPS on Pro only) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19
 
 A gateway, script or Home Assistant on the LAN can read meter data and change settings over plain HTTP. The commands are the same set as on BLE, MQTT and WebSocket. This page covers what is specific to HTTP: sessions, the endpoint list, and how port 80 differs from port 443.
 

@@ -2,7 +2,7 @@
 
 # bt-open-wifi-apis
 
-External API documentation, hands-on tools, and machine-readable manifests for the **Open Wi-Fi API** of Bituo SPM / SDM / SXM energy meters. **Private repository**, shared with partners by invitation. It does not contain firmware source.
+The **SPM / SDM Open Wi-Fi API** for system integrators and DIY builders: interface docs, runnable tools, and machine-readable manifests. Use them to write an app, or to connect a meter to a system you already have. This is a public repository. It does not contain firmware.
 
 Published entry point: [SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview) · How this repo is organized: [`REPO_ORGANIZATION.en.md`](REPO_ORGANIZATION.en.md) · AI entry: [`AGENTS.en.md`](AGENTS.en.md)
 
@@ -85,4 +85,4 @@ Entry documents (this file, `docs/README`, `tools/**/README`, `REPO_ORGANIZATION
 
 ## Do not commit
 
-`tools/ble-secured/ble_crypto_client_cache.json` (it contains the LTK), any real-device PIN / LTK / key screenshot, and firmware source. `.gitignore` already excludes the cache file.
+`tools/ble-secured/ble_crypto_client_cache.json` (it contains the LTK), and any real-device PIN / LTK / key screenshot. `.gitignore` already excludes the cache file.

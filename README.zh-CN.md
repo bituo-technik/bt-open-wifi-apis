@@ -2,7 +2,7 @@
 
 # bt-open-wifi-apis
 
-Bituo SPM / SDM / SXM 电能表 **Open Wi-Fi API** 的对外接口文档、体验工具和机器可读清单。**私有仓库**，按需授权给合作方；不含固件源码。
+给系统集成商和 DIY 用户用的 **SPM / SDM Open Wi-Fi API**：接口说明、可运行的体验工具、机器可读清单。用来自己写 App，或把电表接进已有系统。公开仓库，不含固件。
 
 线上入口：[SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview)　|　组织与维护约定：[`REPO_ORGANIZATION.zh-CN.md`](REPO_ORGANIZATION.zh-CN.md)　|　AI 入口：[`AGENTS.md`](AGENTS.md)
 
@@ -85,4 +85,4 @@ cd tools\ble-secured & py -3 -m pip install -r requirements.txt & py -3 ble_secu
 
 ## 不要提交
 
-`tools/ble-secured/ble_crypto_client_cache.json`（含 LTK）、任何真机 PIN / LTK / 密钥截图、固件源码。`.gitignore` 已排除缓存文件。
+`tools/ble-secured/ble_crypto_client_cache.json`（含 LTK）、任何真机 PIN / LTK / 密钥截图。`.gitignore` 已排除缓存文件。

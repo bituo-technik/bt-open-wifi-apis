@@ -12,9 +12,9 @@
   "hostnamePattern": "EnergySensor-<MODEL>[_<VARIANT>]-<MAC12UPPER>",
   "hostnameRegex": "^EnergySensor-(?P<model>[A-Z0-9]+(?:_[A-Z0-9]+)*?)(?:_(?P<variant>0[0-9]))?-(?P<mac>[0-9A-F]{12})$",
   "variants": {
-    "01": "SXM firmware, SDM01_3PN / SDM01_1PN",
-    "02": "SDMV2 firmware",
-    "none": "SXM firmware, other models"
+    "01": "Basic / Lite, SDM01_3PN / SDM01_1PN",
+    "02": "Basic+ / Pro",
+    "none": "Basic / Lite, other models"
   },
   "renamedWith": "deviceName (<=30 chars)",
   "announcedWhen": "after every successful Wi-Fi connection",

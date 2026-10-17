@@ -17,7 +17,7 @@ Minimal loop: **connect → subscribe to notifications → unlock → provision 
 
 | Item | Value |
 |------|-------|
-| Advertised name | `<model>-<serial>`, e.g. `SDM01_3PN-10304B0D7760`; filter by prefix `SDM` / `SPM` / `SXM` |
+| Advertised name | `<model>-<serial>`, e.g. `SDM01_3PN-10304B0D7760`; filter by prefix `SDM` / `SPM` |
 | Service | `0xA002` |
 | Write (commands) | `0xC303` |
 | Read (snapshot) | `0xC304` |
@@ -79,7 +79,7 @@ function rpc(obj, timeoutMs = 12000) {
 
 async function connectAndUnlock(password = '1234') {
   const dev = await navigator.bluetooth.requestDevice({
-    filters: [{ namePrefix: 'SDM' }, { namePrefix: 'SPM' }, { namePrefix: 'SXM' }],
+    filters: [{ namePrefix: 'SDM' }, { namePrefix: 'SPM' }],
     optionalServices: [UUID.service],
   });
   const server = await dev.gatt.connect();
@@ -144,7 +144,7 @@ After the AI generates code, self-test it with the [acceptance checklist (9.3)](
 
 Use this document if both are true:
 
-- The advertised name starts with `SDM` / `SPM` / `SXM`;
+- The advertised name starts with `SDM` / `SPM`;
 - The GATT service `A002` is present.
 
 Do not use this document if:

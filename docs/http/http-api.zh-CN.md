@@ -1,6 +1,6 @@
 # HTTP / HTTPS API
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（HTTPS 仅 Pro） ｜ 依据：固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（HTTPS 仅 Pro） ｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
 局域网里的网关、脚本、Home Assistant 等可以用 HTTP 直接读电表数据、改配置。命令和 BLE、MQTT、WebSocket 是同一套，本页写 HTTP 自己的部分：会话、接口清单、80 端口与 443 端口的差别。
 

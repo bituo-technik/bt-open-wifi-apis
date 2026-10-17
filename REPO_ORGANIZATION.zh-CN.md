@@ -4,7 +4,7 @@
 
 > 技术笔记（对人）+ 协作约定（对 AI）。  
 > 对应线上入口：[SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview)  
-> 文档版本：2026-10 · 状态：初版齐全——BLE 明文 / 加密，以及 Wi-Fi 侧的 Overview、mDNS、Modbus TCP、HTTP、WebSocket、MQTT、UDP、遥测格式、错误码均已落地（依据固件源码核对，差异见 [CHANGELOG](CHANGELOG.zh-CN.md) 的「待确认」）
+> 文档版本：2026-10 · 状态：初版齐全——BLE 明文 / 加密，以及 Wi-Fi 侧的 Overview、mDNS、Modbus TCP、HTTP、WebSocket、MQTT、UDP、遥测格式、错误码均已落地（差异见 [CHANGELOG](CHANGELOG.zh-CN.md) 的「待确认」）
 
 ---
 
@@ -13,9 +13,9 @@
 | 问题 | 答案 |
 |------|------|
 | 要不要每个 API 一个仓？ | **不要。** 一个仓，按通道分目录。 |
-| 仓是公开还是私有？ | **私有**（`bituo-technik/bt-open-wifi-apis`），按需给合作方授权，不对所有人开放。 |
+| 仓是公开还是私有？ | **公开**（`bituo-technik/bt-open-wifi-apis`）。读者是系统集成商和 DIY 用户。 |
 | 仓里放什么？ | 面向集成商的 API 说明（中 / 英）+ 体验工具 + 机器可读 `spec/`。 |
-| 不放什么？ | ESP32 **固件源码**、产线密钥、任何真实设备的 PIN / LTK / 客户端缓存文件。 |
+| 不放什么？ | 固件、产线密钥、任何真实设备的 PIN / LTK / 客户端缓存文件。 |
 | 两个 BLE 通道的业务 JSON 一样，怎么维护？ | **一份共用文档** `docs/ble-common/`，两个通道文档只写各自传输层。见 §3。 |
 | 和 Gitbook 什么关系？ | 本仓 = 真相源；Gitbook = 发布面，粘贴 `dist/` 里生成的单页或按 `docs/SUMMARY.md` 同步。 |
 | 固件分支怎么表达？ | 用矩阵（Basic / Basic+ / Lite / Pro），不按分支拆仓。 |
@@ -36,14 +36,12 @@
 
 文档与工具必须按「该分支是否支持」标注，禁止假设所有设备都有全部 API。
 
-### 和固件仓的边界
+### 和发布站点的关系
 
 ```text
-[私有] ESP 固件大仓      ← 实现、NVS、编译、产线
-        ↑ 仅在本机双开对照，不 submodule、不复制源码
-[私有] bt-open-wifi-apis ← 协议说明 + Demo 工具 + spec
+bt-open-wifi-apis          ← 协议说明 + 体验工具 + spec（公开）
         ↓ 复制 / 同步
-[发布] docs.bituo-technik.com
+docs.bituo-technik.com
 ```
 
 ---
@@ -158,18 +156,18 @@ bt-open-wifi-apis/
 
 ---
 
-## 6. 私有仓与授权
+## 6. 公开范围
 
-- 默认分支 `main`；合作方用 GitHub 的 **Team / 外部协作者只读** 授权，不要开放写权限。  
+- 默认分支 `main`。仓库公开，方便集成商和 DIY 用户直接阅读、克隆。  
 - `tools/ble-secured/ble_crypto_client_cache.json` 等本地缓存已在 `.gitignore`，**不得提交**。  
-- 不要把仓库地址贴到公开 Issue / 论坛；对外交付用 `dist/` 里的单文件或 Gitbook 页面。  
-- 将来若要公开，先过一遍 §7 的清单，尤其是加密协议参考是否允许公开。
+- 对外页面以本仓 `docs/` 为准，Gitbook 从这里同步，不要只在线上改。  
+- 加密协议和业务广播是集成所必需的接口说明，可以公开。真机密钥、PIN、LTK 缓存不可以。
 
 ---
 
 ## 7. 给维护者的检查清单
 
-- [ ] 仓内不含固件源码、密钥、真机 PIN / LTK / 缓存文件  
+- [ ] 仓内不含固件、密钥、真机 PIN / LTK / 缓存文件，也不出现内部编译代号  
 - [ ] `docs/ble-common` 与 `spec/ble-plain-api.json` 命令集一致  
 - [ ] 中 / 英文档章节与内容对齐（`scripts/check_docs.py` 会检查标题数量与链接）  
 - [ ] 入口页（README、工具 README、本文件、CHANGELOG、AGENTS）的中英正文一起改  
@@ -179,14 +177,14 @@ bt-open-wifi-apis/
 
 ### 本机对照固件（可选）
 
-查协议行为时：在固件仓搜 `cmd` 字符串 / UUID，用结论回写 API 文档；不要反向把文档生成进固件，也不要把固件源码复制进本仓。
+行为有疑问时，用真机或固件同事核对，把结论写回 API 文档。不要把固件复制进本仓。
 
 ---
 
 ## 8. 演进顺序（建议）
 
 1. ~~BLE 明文~~、~~BLE 加密~~ 已迁入  
-2. ~~MQTT、HTTP、mDNS、Modbus TCP、WebSocket、UDP、Overview、遥测格式、错误码~~ 已按固件源码写成初版  
+2. ~~MQTT、HTTP、mDNS、Modbus TCP、WebSocket、UDP、Overview、遥测格式、错误码~~ 已写成初版  
 3. 对照真机逐项确认 CHANGELOG「待确认」里的差异（定位寄存器、Modbus 连接行为、UDP AES 适用分支等），确认后更新文档  
 4. 需要时开通 Gitbook Git Sync（Project directory 指向 `docs/`，目录用 `docs/SUMMARY.md`），然后把线上旧页面指向本仓版本  
 5. 增加继电器（SRS）产品线时，单开 `docs/srs/` 与 `spec/`，不要混进现有电表页面  

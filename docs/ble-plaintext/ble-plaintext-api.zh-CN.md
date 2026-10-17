@@ -17,7 +17,7 @@
 
 | 项 | 值 |
 |----|----|
-| 广播名 | `<型号>-<序列号>`，如 `SDM01_3PN-10304B0D7760`；按前缀 `SDM` / `SPM` / `SXM` 过滤 |
+| 广播名 | `<型号>-<序列号>`，如 `SDM01_3PN-10304B0D7760`；按前缀 `SDM` / `SPM` 过滤 |
 | 服务 | `0xA002` |
 | 写命令 | `0xC303` |
 | 读快照 | `0xC304` |
@@ -79,7 +79,7 @@ function rpc(obj, timeoutMs = 12000) {
 
 async function connectAndUnlock(password = '1234') {
   const dev = await navigator.bluetooth.requestDevice({
-    filters: [{ namePrefix: 'SDM' }, { namePrefix: 'SPM' }, { namePrefix: 'SXM' }],
+    filters: [{ namePrefix: 'SDM' }, { namePrefix: 'SPM' }],
     optionalServices: [UUID.service],
   });
   const server = await dev.gatt.connect();
@@ -144,7 +144,7 @@ AI 生成代码后，用 [9.3 验收清单](#93-验收清单) 自测。
 
 满足下面两点，就按本文对接：
 
-- 广播名前缀为 `SDM` / `SPM` / `SXM`；
+- 广播名前缀为 `SDM` / `SPM`；
 - 能发现 GATT 服务 `A002`。
 
 不要按本文对接：
