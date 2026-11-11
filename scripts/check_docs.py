@@ -157,11 +157,12 @@ for name in ("EnergySensor-SDM01_3PN_01-45705E597760", "EnergySensor-SPM02-14205
     if not rx.match(name):
         bad(f"spec/mdns-discovery.json hostnameRegex does not match {name}")
 
-# 8. every tool file in tools/lan is listed in its README
-lan_readme = (ROOT / "tools/lan/README.md").read_text(encoding="utf-8")
-for py in sorted((ROOT / "tools/lan").glob("*.py")):
-    if py.name not in lan_readme:
-        bad(f"tools/lan/{py.name} is not mentioned in tools/lan/README.md")
+# 8. every tool file in tools/lan is listed in both language READMEs
+for rel in ("tools/lan/README.zh-CN.md", "tools/lan/README.en.md"):
+    lan_readme = (ROOT / rel).read_text(encoding="utf-8")
+    for py in sorted((ROOT / "tools/lan").glob("*.py")):
+        if py.name not in lan_readme:
+            bad(f"tools/lan/{py.name} is not mentioned in {rel}")
 
 print("checked", len(md_files), "markdown files; problems:", problems)
 sys.exit(1 if problems else 0)

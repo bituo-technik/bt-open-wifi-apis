@@ -78,7 +78,7 @@ try:
 except ImportError as exc:  # pragma: no cover
     raise SystemExit("py -3 -m pip install bleak") from exc
 
-DEVICE_NAME_FILTERS = ("SDM", "SPM", "SXM", "Pulse")
+DEVICE_NAME_FILTERS = ("SDM", "SPM", "Pulse")
 GATT_DROP = "__GATT_DROP__"
 
 

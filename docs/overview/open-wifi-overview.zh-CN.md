@@ -1,8 +1,12 @@
 # SPM / SDM Open Wi-Fi API 总览
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 系列（ESP32-8685 / C6）｜ 对应固件源码快照：SXM_EW_C3 `5.1.16`、SDMV2_EW_C3 `1.2.12`、SDMV2_EW_C6 `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 系列（ESP32-8685 / C6）｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
-本页是整套 API 的入口：先判断你手里设备属于哪个**固件分支**，再按用途选**通信通道**，最后进入对应通道文档。
+本页是整套 API 的入口。按这个顺序读，不要一上来翻加密协议：
+
+1. 第 2 节确认设备是 Basic、Basic+、Lite 还是 Pro。
+2. 第 4 节按你要做的事选一个通道。
+3. 只打开那一篇。配网和读写走 GATT；不连接就要电参，再打开业务加密广播。
 
 ## 1. 简介
 
@@ -33,8 +37,6 @@ Open Wi-Fi 系列电表提供本地与云端两类通信方式：
 3. Lite 的 BLE 加密覆盖配网和数据广播；Wi-Fi 侧只有 MQTT 支持 TLS 1.2 / 1.3，HTTP、Modbus TCP、WebSocket 都没有 TLS。
 4. Pro 的 BLE 加密覆盖配网和数据广播；Wi-Fi 侧同一时刻最多 **2** 路 TLS 连接。
 
-> 本仓库的固件源码用 `PRODUCT_MODEL` 和 `BLE_APP_CRYPTO_ENABLE` 编译出不同分支：SXM（C3）未开启加密为 Basic，开启为 Lite；SDMV2 C3 未开启加密为 Basic+；SDMV2 C6 开启加密为 Pro。这是根据源码和发布页版本号做的对应，不是官方对照表。
-
 ### 2.1 通过什么判断分支
 
 | 想知道 | 怎么读 |
@@ -61,9 +63,9 @@ Open Wi-Fi 系列电表提供本地与云端两类通信方式：
 | UDP 上报（AES-CCM 加密） | ❌ | ❌ | ✅ | ✅ |
 | mDNS 发现 | ✅ | ✅ | ✅ | ✅ |
 
-HTTP 默认状态依据固件源码：非加密构建（Basic、Basic+）每次开机都会把 HTTP 位置 1；加密构建（Lite、Pro）默认关闭，要通过 BLE `enablehttp` 打开。Pro 开启 HTTPS 后，80 端口的业务接口返回 403，见 [HTTP 文档](../http/http-api.zh-CN.md#4-80-端口的访问策略)。
+HTTP 的出厂状态：Basic、Basic+ 每次开机都打开 HTTP；Lite、Pro 默认关闭，要用 BLE 命令 `enablehttp` 打开。Pro 开启 HTTPS 后，80 端口的业务接口返回 403，见 [HTTP 文档](../http/http-api.zh-CN.md#4-80-端口的访问策略)。
 
-上面的矩阵是线上已发布的版本。**UDP AES-CCM** 一项与固件源码不同：加密报文只存在于 SDMV2 加密构建（Pro），并且只在 HTTPS 打开时生效；SXM 加密构建（Lite）始终发送明文。请以实际部署的版本为准，细节见 [UDP 第 4 节](../udp/udp-api.zh-CN.md#4-aes-ccm-加密报文)。
+**UDP AES-CCM** 请以手里的设备为准。已发布的矩阵写 Lite 和 Pro 都支持；在 Lite `5.1.16` 上实际始终是明文，加密报文只在 Pro `3.1.19` 且 HTTPS 打开时出现。细节见 [UDP 第 4 节](../udp/udp-api.zh-CN.md#4-aes-ccm-加密报文)。
 
 ### 3.1 TLS 连接数限制
 
@@ -117,5 +119,6 @@ HTTP 默认状态依据固件源码：非加密构建（Basic、Basic+）每次�
 | [mDNS](../mdns/mdns-discovery.zh-CN.md) | 主机名规则、验证方法 |
 | [BLE 业务命令参考](../ble-common/ble-business-api.zh-CN.md) | 全部命令的唯一说明 |
 | [BLE 明文](../ble-plaintext/ble-plaintext-api.zh-CN.md) / [BLE 加密](../ble-secured/ble-secured-api.zh-CN.md) | 两种 BLE 传输层 |
+| [业务加密广播](../ble-secured/ble-advertising.zh-CN.md) | 不连接 GATT，从广播里读电参（仅 Lite / Pro） |
 
 给 AI 用的整合单文件见 [`AGENTS.md`](../../AGENTS.md)；机器可读的接口清单在 [`spec/`](../../spec/)。

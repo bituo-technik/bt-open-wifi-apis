@@ -1,6 +1,6 @@
 # mDNS 发现
 
-> 状态：初版 | 适用：所有 SPM / SDM Open Wi-Fi 分支 | 依据固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19` 以及 Gitbook「mDNS Discovery」页面
+> 状态：初版 | 适用：所有 SPM / SDM Open Wi-Fi 分支 | 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19 以及 Gitbook「mDNS Discovery」页面
 
 电表连上 Wi-Fi 后，会通过 mDNS（组播 DNS）广播自己。同一网段里的网关、EMS 或手机 App 不需要静态 IP、也不需要扫描，就能找到每一台电表的 IP 地址，再使用 [Modbus TCP](../modbus-tcp/modbus-tcp-api.zh-CN.md)、[HTTP](../http/http-api.zh-CN.md)、[WebSocket](../websocket/websocket-api.zh-CN.md) 或 [UDP](../udp/udp-api.zh-CN.md)。
 
@@ -36,9 +36,9 @@ EnergySensor-SDM01_3PN_01-45705E597760.local.
 
 | 固件 | 变体 | 示例 |
 |------|------|------|
-| SXM（Basic / Lite）：SDM01_3PN 与 SDM01_1PN | `_01` | `EnergySensor-SDM01_3PN_01-45705E597760` |
-| SXM（Basic / Lite）：其它型号，如 SPM02、SDM02 | 无 | `EnergySensor-SPM02-45705E597760` |
-| SDMV2（Basic+ / Pro） | `_02` | `EnergySensor-SDM01_3PN_02-45705E597760` |
+| Basic / Lite：SDM01_3PN 与 SDM01_1PN | `_01` | `EnergySensor-SDM01_3PN_01-45705E597760` |
+| Basic / Lite：其它型号，如 SPM02、SDM02 | 无 | `EnergySensor-SPM02-45705E597760` |
+| Basic+ / Pro | `_02` | `EnergySensor-SDM01_3PN_02-45705E597760` |
 
 客户定制固件可能用别的名字替换型号。
 
@@ -81,7 +81,7 @@ mDNS 记录里只有 80 端口，其它端口请使用上面的默认值。
 
 | 平台 | 命令 / 工具 |
 |------|-------------|
-| 任意平台，有 Python | `python tools/lan/discover_mdns.py`（见 [tools/lan](../../tools/lan/README.md)），列出找到的所有电表 |
+| 任意平台，有 Python | `python tools/lan/discover_mdns.py`（见 [tools/lan](../../tools/lan/README.zh-CN.md)），列出找到的所有电表 |
 | macOS | `dns-sd -B _http._tcp` 与 `dns-sd -L "<名称>" _http._tcp local` |
 | Linux | `avahi-browse -rt _http._tcp` |
 | Windows | Bonjour 的 `dns-sd`（随 iTunes / Bonjour Print Services 安装），或上面的 Python 工具 |

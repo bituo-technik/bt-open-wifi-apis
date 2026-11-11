@@ -9,7 +9,7 @@
 
 本文面向系统集成商、DIY 开发者和 AI 编程助手。命令名、字段名、设备 `msg` 保持英文原样。
 
-> **文档分工：** 本页讲加密通道的**传输层**——UUID、握手、密钥派生摘要、加密信封、重连。配网命令、设备命令、读快照字段、业务错误码在 [业务命令参考（明文 / 加密共用）](../ble-common/ble-business-api.zh-CN.md)，解密后的业务 JSON 与明文通道**完全一致**，只维护一份。J-PAKE / ZKP 的二进制布局、广播厂商数据细节在 [协议权威参考](crypto-protocol.zh-CN.md)，**两份文档冲突时以它为准**。
+> **文档分工：** 本页讲加密通道的**传输层**——UUID、握手、密钥派生摘要、加密信封、重连。配网命令、设备命令、读快照字段、业务错误码在 [业务命令参考（明文 / 加密共用）](../ble-common/ble-business-api.zh-CN.md)，解密后的业务 JSON 与明文通道**完全一致**，只维护一份。J-PAKE / ZKP 的二进制布局在 [协议权威参考](crypto-protocol.zh-CN.md)，**握手和信封冲突时以它为准**。不连接就能读到的电参见 [业务加密广播](ble-advertising.zh-CN.md)。
 
 线上 Overview：[SPM/SDM Open Wi-Fi API Overview](https://docs.bituo-technik.com/device-api/spm-sdm-open-wi-fi-api-overview)（BLE Secured 适用于 Lite/Pro）。
 
@@ -21,7 +21,7 @@
 
 | 项 | 值 |
 |----|----|
-| 广播名 | `<型号>-<序列号>`，如 `SDM01_3PN-10304B0D7760`；按前缀 `SDM` / `SPM` / `SXM` 过滤 |
+| 广播名 | `<型号>-<序列号>`，如 `SDM01_3PN-10304B0D7760`；按前缀 `SDM` / `SPM` 过滤 |
 | 服务 | `0xA003` |
 | 写命令 | `0xC313` |
 | 读快照 | `0xC314` |
@@ -65,7 +65,7 @@
 
 ## 2. 用 AI 写你自己的 App
 
-把**本页全文、[业务命令参考](../ble-common/ble-business-api.zh-CN.md) 全文、[协议权威参考](crypto-protocol.zh-CN.md) 全文**连同下面这段提示词交给 AI。（也可以用仓库里生成好的单文件合集，见 `AGENTS.md`。）
+把**本页全文、[业务命令参考](../ble-common/ble-business-api.zh-CN.md) 全文、[协议权威参考](crypto-protocol.zh-CN.md) 全文**连同下面这段提示词交给 AI。（也可以用仓库里生成好的单文件合集，见 [`AGENTS.md`](../../AGENTS.md)。）
 
 ```text
 你要实现一个 BLE 客户端，对接下面的"电表加密 BLE 接口说明"（Lite/Pro）、"业务命令参考"和"协议权威参考"。
@@ -103,7 +103,7 @@ AI 生成代码后，用 [9.3 验收清单](#93-验收清单) 自测。
 
 满足下面两点，就按本文对接：
 
-- 广播名前缀为 `SDM` / `SPM` / `SXM`；  
+- 广播名前缀为 `SDM` / `SPM`；  
 - 能发现 GATT 服务 `A003`。
 
 不要按本文对接：
@@ -272,7 +272,7 @@ ble-crypto-ver → step=2 → ble-crypto-session-nonce(新 client_nonce)
 → 最多约 12 次重试
 ```
 
-`wifi` 成功后 BLE 通常保持连接，便于读 IP。**Wi-Fi 连上之后，设备默认会收起应用 GATT 和广播里的服务 UUID**（降低暴露面）；若希望配网后仍能用 BLE，配网时在 `wifi` 命令里带 `enableble:true`，见 [业务命令参考 §2.2](../ble-common/ble-business-api.zh-CN.md#22-下发-ssid-与密码) 和 [协议权威参考 §9.4](crypto-protocol.zh-CN.md#94-wifi-已连接时的-gatt-与广播-uuid)。
+`wifi` 成功后 BLE 通常保持连接，便于读 IP。**Wi-Fi 连上之后，设备默认会收起应用 GATT 和广播里的服务 UUID**（降低暴露面）；若希望配网后仍能用 BLE，配网时在 `wifi` 命令里带 `enableble:true`，见 [业务命令参考 §2.2](../ble-common/ble-business-api.zh-CN.md#22-下发-ssid-与密码) 和 [业务加密广播 §5](ble-advertising.zh-CN.md#5-wi-fi-已连接时的广播与-gatt)。
 
 ### 4.11 常见陷阱
 
@@ -426,7 +426,7 @@ sequenceDiagram
 
 ## 10. 体验工具
 
-协议与本文一致。详见 [`tools/README.md`](../../tools/README.md)。
+协议与本文一致。详见 [`tools/README.zh-CN.md`](../../tools/README.zh-CN.md)。
 
 **托管地址：** 官方托管的网页地址与 Windows 工具下载地址以发布渠道为准，发布后补充到这里。
 
@@ -478,4 +478,4 @@ py -3 ble_secured_gui.py
 
 ## 附录 D 广播厂商数据（可选）
 
-加密固件可在广播中带短包（5 字节，step=0）或长包（26 字节，AES-128-CCM，tag=4，密钥为 broadcast_key）。GATT 业务信封与广播 CCM **参数不同**。长包解密后是 15 字节明文（电压、电流、功率、电能等定点二进制），字段布局见 [协议权威参考第 9 节](crypto-protocol.zh-CN.md#9-ble-广播厂商数据动态广播)。集成方若只需配网与读写特征，可暂不实现广播解密；需要时参考 Windows 工具的"业务广播"页。
+不连接 GATT、只从广播里读电参，见 [业务加密广播](ble-advertising.zh-CN.md)。GATT 信封和广播的 AES-CCM 参数不同，不要互相套用。只做配网和读写特征时可以跳过。

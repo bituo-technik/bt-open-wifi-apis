@@ -74,14 +74,14 @@ getFunctionMap 写C303  d.functionMap 为 uint16，按位见下方
 mqttdata 写C303  d.MF 连接状态 TP/TC/TR/TM 主题 MU/MPS 账号
 udpdata  写C303  UDP 目标列表
 getInterval 写C303  d.value WebSocket 推送 ms（无 WS 则 unsupported / 1005）
-getModbusTlsMuxSetupStatus  仅带局域网 TLS 的型号；SXM 常 unsupported
+getModbusTlsMuxSetupStatus  仅带局域网 TLS 的型号；Basic / Lite 上常为 unsupported
 
 -------- 通讯开关（改 functionMap，部分需重启才监听端口）--------
 enablehttp  {"cmd":"enablehttp","enable":true|false}  明文 HTTP :80  成功 http yes / http off
 enablewebsocket  {"cmd":"enablewebsocket","enable":true}  可选 enableTLS
 enablemodbustcp  {"cmd":"enablemodbustcp","enable":true}
 enabletls   {"cmd":"enabletls","enable":true}
-enablehttps 仅 PRO/带局域网 TLS 的型号；C3 明文 SXM 常 unsupported
+enablehttps 仅 PRO/带局域网 TLS 的型号；Basic 上常为 unsupported
 functionMap  {"cmd":"functionMap","value":整数}  整图覆盖，吃内存通道最多同时 2 个，慎用
          非法组合 functionMap error / 1014
 
@@ -159,7 +159,7 @@ FW    固件版本    SN 序列号    TP 产品类型
 1002  Error password length!     新密码超过 16（与 Please unlock 同码，用 msg 区分）
 1003  auth error                 鉴权串策略（与 Password Error 同码时看 msg）
 1004  bad value                  数值非法（如间隔 <100）
-1005  unsupported                当前型号无此命令（SXM 上 enablehttps/setInterval 等常见）
+1005  unsupported                当前型号无此命令（Basic / Lite 上 enablehttps、setInterval 等常见）
 1006  null                       非对应型号无数据
 1014  functionMap error          功能位组合非法（吃内存通道超过 2 个等）
 1015  unknow cmd                 未知命令
@@ -245,14 +245,14 @@ getFunctionMap write C303  d.functionMap uint16, bits below
 mqttdata write C303  topics TP/TC/TR/TM, MU/MPS; MF only if MQTT enabled
 udpdata  write C303  UDP target list in d.udp_data
 getInterval write C303  d.value WebSocket push ms (unsupported / unknow cmd if no WS)
-getModbusTlsMuxSetupStatus  LAN-TLS models only; often unsupported on SXM
+getModbusTlsMuxSetupStatus  LAN-TLS models only; often unsupported on Basic / Lite
 
 -------- LAN switches (change functionMap; recommend restart after) --------
 enablehttp  {"cmd":"enablehttp","enable":true|false}  plain HTTP :80  http yes / http off
 enablewebsocket  {"cmd":"enablewebsocket","enable":true}  optional enableTLS
 enablemodbustcp  {"cmd":"enablemodbustcp","enable":true}
 enabletls   {"cmd":"enabletls","enable":true}
-enablehttps PRO / LAN-TLS models only; often unsupported on plain C3 SXM
+enablehttps PRO / LAN-TLS models only; often unsupported on Basic
 functionMap  {"cmd":"functionMap","value":int}  overwrites full map; use with care
          illegal combo functionMap error / 1014
 
@@ -378,8 +378,8 @@ TP_NAMES: dict[int, str] = {
     5: "两路（SDM02）",
     6: "单相+开关（未发布）",
     7: "两路+开关（未发布）",
-    8: "SDMV2",
-    9: "SDMV2S3 / H2",
+    8: "SDM01 Gen2",
+    9: "其它",
 }
 
 METER_FIELDS: list[tuple[str, str]] = [

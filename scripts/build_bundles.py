@@ -17,7 +17,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 PARTS = {
     "ble-plaintext": ["ble-plaintext/ble-plaintext-api", "ble-common/ble-business-api"],
-    "ble-secured": ["ble-secured/ble-secured-api", "ble-common/ble-business-api", "ble-secured/crypto-protocol"],
+    "ble-secured": ["ble-secured/ble-secured-api", "ble-secured/ble-advertising", "ble-common/ble-business-api", "ble-secured/crypto-protocol"],
     # Wi-Fi channels: channel page + shared pages it depends on
     "mqtt": ["mqtt/mqtt-api", "ble-common/ble-business-api", "reference/telemetry-payload", "reference/error-codes"],
     "http": ["http/http-api", "ble-common/ble-business-api", "reference/telemetry-payload", "reference/error-codes"],

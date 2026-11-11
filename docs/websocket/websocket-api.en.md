@@ -1,6 +1,6 @@
 # WebSocket API
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (WSS needs a TLS slot, see the [overview](../overview/open-wifi-overview.en.md#3-channel-capability-matrix)) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (WSS needs a TLS slot, see the [overview](../overview/open-wifi-overview.en.md#3-channel-capability-matrix)) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19
 
 WebSocket suits a local hub on the LAN (for example Home Assistant or your own dashboard): once connected, the meter **pushes** telemetry periodically, with no repeated polling. The same connection can also carry commands.
 
@@ -139,7 +139,7 @@ async def main():
 asyncio.run(main())
 ```
 
-The [WebSocket client tool](../../tools/lan/README.md) in this repository reconnects automatically and shows pushes and responses separately.
+The [WebSocket client tool](../../tools/lan/README.en.md) in this repository reconnects automatically and shows pushes and responses separately.
 
 ## 7. Troubleshooting
 

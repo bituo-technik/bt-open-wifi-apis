@@ -1,6 +1,6 @@
 # Telemetry Payload
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches | Based on firmware source snapshots SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19
 
 The device periodically builds one telemetry JSON (a "packet"). The same JSON is sent unchanged over several channels, so its fields are maintained only on this page.
 
@@ -15,7 +15,7 @@ The device periodically builds one telemetry JSON (a "packet"). The same JSON is
 | Modbus TCP | Register reads, **not JSON**; see [Modbus TCP](../modbus-tcp/modbus-tcp-api.en.md) | On demand |
 | BLE | `cmd=read`, then read the characteristic | On demand |
 
-The periods are independent; how to change them is in the [Business Command Reference](../ble-common/ble-business-api.en.md) (`mqtt`, `udp`, `setInterval`). Factory defaults come from the firmware source; the device value wins and can be read from the `model` response (MQTT period `MI`, UDP period `UI`; in HTTP `/model` they are `mqttInterval`, `udpInterval`, `wsInterval`).
+The periods are independent; how to change them is in the [Business Command Reference](../ble-common/ble-business-api.en.md) (`mqtt`, `udp`, `setInterval`). The value on the device wins over any factory default and can be read from the `model` response (MQTT period `MI`, UDP period `UI`; in HTTP `/model` they are `mqttInterval`, `udpInterval`, `wsInterval`).
 
 ## 2. Common fields
 
@@ -39,13 +39,13 @@ Present on every model:
 
 | TP | Model | Phases | Seen on |
 |----|-------|--------|---------|
-| 1 | `SPM01` | single | Basic, Lite (SXM builds) |
-| 2 | `SDM01_1PN` | single | Basic, Lite (SXM builds) |
-| 3 | `SPM02` | three | Basic, Lite (SXM builds) |
-| 4 | `SDM01_3PN` | three | Basic, Lite (SXM builds) |
+| 1 | `SPM01` | single | Basic, Lite |
+| 2 | `SDM01_1PN` | single | Basic, Lite |
+| 3 | `SPM02` | three | Basic, Lite |
+| 4 | `SDM01_3PN` | three | Basic, Lite |
 | 5 | `SDM02` | split | Basic, Lite |
-| 8 | all SDM01 Gen2 models | single or three | Basic+, Pro (SDMV2 C3 / C6 builds) |
-| 9 | SDMV2S3 / H2 builds | — | other builds, not covered here |
+| 8 | all SDM01 Gen2 models | single or three | Basic+, Pro |
+| 9 | other models | — | not covered here |
 
 Points to remember:
 
@@ -108,7 +108,7 @@ Values are **strings** with fixed decimals: voltage 1, current and power 3, powe
 | `ReverseEnergyX`, `ReverseEnergyY`, `ReverseEnergyZ`, `TotalReverseEnergy` | kWh |
 | `TotalEnergyX`, `TotalEnergyY`, `TotalEnergyZ`, `TotalEnergy` | kWh |
 
-Field sets differ slightly between firmware versions (for example `TotalCurrent`, `TotalReactivePower`, `TotalApparentPower`, `AverageVoltageL_N`, `AverageLineCurrent` and `TotalEnergy*` exist in the 5.1.16 source and may be missing on older versions). Use a field if it is there and ignore it if it is not.
+Field sets differ slightly between firmware versions (for example `TotalCurrent`, `TotalReactivePower`, `TotalApparentPower`, `AverageVoltageL_N`, `AverageLineCurrent` and `TotalEnergy*` exist on 5.1.16 and may be missing on older versions). Use a field if it is there and ignore it if it is not.
 
 ## 5. Examples
 

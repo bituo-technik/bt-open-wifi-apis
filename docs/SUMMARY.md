@@ -1,9 +1,8 @@
 # Summary
 
-* [阅读路径](README.md)
-
 ## 中文
 
+* [阅读路径](README.zh-CN.md)
 * [Open Wi-Fi API 总览](overview/open-wifi-overview.zh-CN.md)
   * [mDNS 发现](mdns/mdns-discovery.zh-CN.md)
   * [Modbus TCP](modbus-tcp/modbus-tcp-api.zh-CN.md)
@@ -16,10 +15,12 @@
 * [BLE 业务命令参考（明文 / 加密共用）](ble-common/ble-business-api.zh-CN.md)
   * [明文 BLE 接口说明（Basic / Basic+）](ble-plaintext/ble-plaintext-api.zh-CN.md)
   * [加密 BLE 接口说明（Lite / Pro）](ble-secured/ble-secured-api.zh-CN.md)
+    * [业务加密广播](ble-secured/ble-advertising.zh-CN.md)
     * [加密协议权威参考](ble-secured/crypto-protocol.zh-CN.md)
 
 ## English
 
+* [Reading paths](README.en.md)
 * [Open Wi-Fi API Overview](overview/open-wifi-overview.en.md)
   * [mDNS Discovery](mdns/mdns-discovery.en.md)
   * [Modbus TCP](modbus-tcp/modbus-tcp-api.en.md)
@@ -32,4 +33,5 @@
 * [BLE Business Command Reference (plaintext and secured)](ble-common/ble-business-api.en.md)
   * [Plaintext BLE API (Basic / Basic+)](ble-plaintext/ble-plaintext-api.en.md)
   * [Secured BLE API (Lite / Pro)](ble-secured/ble-secured-api.en.md)
+    * [Encrypted business advertising](ble-secured/ble-advertising.en.md)
     * [Secured channel protocol reference](ble-secured/crypto-protocol.en.md)

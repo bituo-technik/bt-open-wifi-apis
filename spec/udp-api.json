@@ -24,6 +24,6 @@
   "encryptedPayload": {
     "algorithm": "AES-CCM",
     "key": "broadcast key (see docs/udp section 4)",
-    "availableOn": "Pro (SDMV2 crypto build with HTTPS on)"
+    "availableOn": "Pro, and only while HTTPS is on"
   }
 }

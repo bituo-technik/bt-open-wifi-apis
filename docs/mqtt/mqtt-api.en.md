@@ -1,6 +1,6 @@
 # MQTT API
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (TLS support: see the [overview](../overview/open-wifi-overview.en.md#3-channel-capability-matrix)) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`, and the online MQTT API Reference
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (TLS support: see the [overview](../overview/open-wifi-overview.en.md#3-channel-capability-matrix)) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19, and the online MQTT API Reference
 
 The meter can connect to your own MQTT broker: it publishes telemetry periodically, subscribes to a command topic, and publishes each result to a response topic. The commands are the same set as on BLE, HTTP and WebSocket. This page covers only what is specific to MQTT: topics, connection behavior, legacy commands and MQTTS setup.
 
@@ -37,7 +37,7 @@ Notes:
 
 At each MQTT report period the device publishes one JSON to `/data`. Fields, per-model differences and examples are on the [Telemetry Payload](../reference/telemetry-payload.en.md) page. Only the MQTT-specific parts are here:
 
-- The period is set by the fifth segment of the `mqtt` command (in **seconds**, minimum 1 s). `MI` in the `model` response is in **milliseconds**. The factory default in the source is 5 s; the online documentation says 30 s. Trust the `MI` you read from the device.
+- The period is set by the fifth segment of the `mqtt` command (in **seconds**, minimum 1 s). `MI` in the `model` response is in **milliseconds**. The factory default on the device is 5 s; the online documentation says 30 s. Trust the `MI` you read from the device.
 - It is published only while connected to the broker; data from an offline period is **not replayed**.
 - With `commonmode` on, `/data` carries the generic format; see Section 6 of the telemetry page.
 
@@ -110,7 +110,7 @@ The full commands, parameters and responses are in the [Business Command Referen
 
 ### 5.3 Legacy commands
 
-These commands remain from older firmware. The source still handles them and the responses use the old format. Use the unified commands from Section 5.2 for new development.
+These commands remain from older firmware. The device still handles them and the responses use the old format. Use the unified commands from Section 5.2 for new development.
 
 | Command | Parameters | Behavior | Response |
 |---------|------------|----------|----------|
@@ -205,4 +205,4 @@ mosquitto_sub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEF
 mosquitto_pub -h broker.example.com -p 1883 -u user -P pwd -t "SPM02/AABBCCDDEEFF/cmd" -m '{"cmd":"location"}'
 ```
 
-The [MQTT monitor tool](../../tools/lan/README.md) in this repository can subscribe, send commands and match responses by `event`.
+The [MQTT monitor tool](../../tools/lan/README.en.md) in this repository can subscribe, send commands and match responses by `event`.

@@ -1,6 +1,6 @@
 # Modbus TCP
 
-> 状态：初版 | 适用：所有 SPM / SDM Open Wi-Fi 分支（Modbus TCP over TLS 仅 Basic+ 与 Pro）| 依据固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`；寄存器表与 Gitbook「Modbus TCP Map - ESP32-8685」一致
+> 状态：初版 | 适用：所有 SPM / SDM Open Wi-Fi 分支（Modbus TCP over TLS 仅 Basic+ 与 Pro）| 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19；寄存器表与 Gitbook「Modbus TCP Map - ESP32-8685」一致
 
 Modbus TCP 是 PLC、工业网关、EMS 读取电表数据最常用的方式。设备是 **Modbus TCP 服务端（从站）**，端口 **502**：由你来轮询，从固定寄存器读取电参量，设备不会主动推送。
 
@@ -39,7 +39,7 @@ Modbus TCP 是 PLC、工业网关、EMS 读取电表数据最常用的方式。�
 - 长度字段与实际不符的帧会被**直接丢弃、没有应答**，客户端表现为超时。
 - 建议两次请求间隔不小于 **150 ms**；电能数据通常没必要比约每秒一次更快地轮询。
 
-> Gitbook 页面写的是设备只接受一个连接，并且每次读取后都会复位 socket，要求每次请求都重新连接。固件源码并非如此：连接会被保持。每次重连仍然可用，对简单客户端也是最稳妥的做法，所以这条建议保持兼容。差异已记入 CHANGELOG。
+> 已发布的页面写的是设备只接受一个连接，并且每次读取后都会复位 socket，要求每次请求都重新连接。设备实际会保持连接。每次重连仍然可用，对简单客户端也是最稳妥的做法。差异已记入 CHANGELOG。
 
 ### 2.2 Modbus TCP over TLS
 
@@ -64,7 +64,7 @@ Basic+ 与 Pro 可以开启 Modbus TLS（用 `enabletls` / `enablemodbustcp` 打
 
 ## 4. 寄存器表
 
-下表对应默认上报模式 `commonmode = 0`。设备切换到通用格式（`commonmode = 1`，见业务指令参考）后，Modbus 读取映射会换成另一套布局，下表**不再适用**。设备还有 `mda` / `minvert` 指令（SXM 与 SDMV2 固件），可为定制集成重映射寄存器地址或交换字节，本文不涉及；`mda` 同时会把 `commonmode` 设回 0 并打开 Modbus TCP。出厂布局即下表。
+下表对应默认上报模式 `commonmode = 0`。设备切换到通用格式（`commonmode = 1`，见业务指令参考）后，Modbus 读取映射会换成另一套布局，下表**不再适用**。设备还有 `mda` / `minvert` 指令，可为定制集成重映射寄存器地址或交换字节，本文不涉及；`mda` 同时会把 `commonmode` 设回 0 并打开 Modbus TCP。出厂布局即下表。
 
 ### 4.1 产品识别（基地址 978）
 
@@ -193,7 +193,7 @@ Basic+ 与 Pro 可以开启 Modbus TLS（用 `enabletls` / `enablemodbustcp` 打
 - 定位会让 LED 闪烁（Gitbook 页面写的是约 15 秒），方便在密集的配电箱里找到对应的电表；效果与 `location` 指令相同。
 - **电能清零不可恢复**，效果与 `zero` 指令相同。
 
-> Gitbook 页面把定位寄存器写成 **10000**（`0x2710`）。固件源码里 Wi-Fi 模块通过 Modbus TCP 并不处理 10000：定位在 **10002**（`0x2712`）；10000 是表侧 MCU 上同一功能的地址，页面可能由此而来。10001 的清零在两处一致。本文以源码为准，请在真机上确认，差异已记入 CHANGELOG。
+> 已发布的页面把定位寄存器写成 **10000**（`0x2710`）。Wi-Fi 模块通过 Modbus TCP 并不处理 10000：定位在 **10002**（`0x2712`）。10000 是表侧 MCU 上同一功能的地址。10001 的清零在两处一致。请在设备上确认，差异已记入 CHANGELOG。
 
 ## 6. 示例
 
@@ -208,7 +208,7 @@ mbpoll -m tcp -a 1 -0 -B -t 3:float -r 1044 -c 1 192.168.1.50
 
 ### 6.2 原生 Python
 
-工具 [`tools/lan/modbus_poll.py`](../../tools/lan/README.md) 不依赖第三方库，并且会解析识别信息区。核心代码如下：
+工具 [`tools/lan/modbus_poll.py`](../../tools/lan/README.zh-CN.md) 不依赖第三方库，并且会解析识别信息区。核心代码如下：
 
 ```python
 import socket, struct

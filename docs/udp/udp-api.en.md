@@ -1,6 +1,6 @@
 # UDP Report
 
-> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (for who gets the AES-encrypted datagram see [Section 4](#4-aes-ccm-encrypted-datagram)) | Based on firmware source SXM_EW_C3 `5.1.16`, SDMV2 `1.2.12` / `3.1.19`
+> Status: first release | Applies to: all SPM / SDM Open Wi-Fi branches (for who gets the AES-encrypted datagram see [Section 4](#4-aes-ccm-encrypted-datagram)) | Firmware versions covered: Basic / Lite 5.1.16, Basic+ 1.2.12, Pro 3.1.19
 
 UDP report is **pushed by the device**: you give the meter an IP and a port, and it sends the telemetry JSON there as a UDP datagram at a fixed period. There is no connection and no handshake, so latency is low and implementation is simple. It fits scenarios that need power readings quickly, such as PV export limiting and dynamic load balancing.
 
@@ -65,7 +65,7 @@ With `commonmode` on, the datagram follows the generic format; see Section 6 of 
 
 ## 4. AES-CCM encrypted datagram
 
-> Scope: in the source, only the **secured builds** of SDMV2 (C3 / C6) have this feature, and it takes effect only while the **HTTPS switch** (`enablehttps`) is on. SXM builds (Basic, Lite) always send plaintext. The online documentation says Lite supports it too, which does not match the source and needs firmware confirmation; see the [CHANGELOG](../../CHANGELOG.md).
+> Scope: the encrypted datagram is sent only on Pro, and only while HTTPS (`enablehttps`) is on. Basic and Lite always send plaintext. Published notes that say Lite supports it do not match Pro `3.1.19` and Lite `5.1.16`. See the [CHANGELOG](../../CHANGELOG.en.md).
 
 When it is on, the datagram is no longer the telemetry JSON but a ciphertext JSON:
 
@@ -118,7 +118,7 @@ Notes:
 - **Replay protection**: `counter` resets after a device reboot, so ordering by it alone is not reliable; `Post` inside the plaintext resets too. For replay protection, use `Time` (Unix time) in the plaintext with a window check.
 - When the device has no broadcast key (for example secured provisioning was never completed), it sends an **empty datagram**. A datagram of length 0 can simply be ignored.
 - After `enablehttps` is turned off, datagrams go back to plaintext. The receiver should handle both: run `JSON.parse` first and decrypt if a `ct` field exists.
-- How to get the broadcast key out of the BLE provisioning result: the [BLE secured tools](../../tools/README.md) in this repository cache it locally, and the UDP listener tool can read it directly.
+- How to get the broadcast key out of the BLE provisioning result: the [BLE secured tools](../../tools/README.en.md) in this repository cache it locally, and the UDP listener tool can read it directly.
 
 ## 5. Receiver example
 
@@ -137,7 +137,7 @@ while True:
     print(addr[0], msg.get("SerialNumber"), msg.get("Post"))
 ```
 
-The [UDP listener tool](../../tools/lan/README.md) in this repository handles both plaintext and AES-CCM datagrams and detects loss.
+The [UDP listener tool](../../tools/lan/README.en.md) in this repository handles both plaintext and AES-CCM datagrams and detects loss.
 
 ## 6. Troubleshooting
 

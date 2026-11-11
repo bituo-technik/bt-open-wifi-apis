@@ -1,6 +1,6 @@
 # HTTP / HTTPS API
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（HTTPS 仅 Pro） ｜ 依据：固件源码 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支（HTTPS 仅 Pro） ｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
 局域网里的网关、脚本、Home Assistant 等可以用 HTTP 直接读电表数据、改配置。命令和 BLE、MQTT、WebSocket 是同一套，本页写 HTTP 自己的部分：会话、接口清单、80 端口与 443 端口的差别。
 
@@ -225,7 +225,7 @@ curl -k "https://192.168.1.50/snapshot?token=1736912345"
 
 `udp` 命令的参数名以[业务命令参考](../ble-common/ble-business-api.zh-CN.md)为准。
 
-本仓库的 [HTTP 轮询工具](../../tools/lan/README.md) 会自动处理登录和 token 续期。
+本仓库的 [HTTP 轮询工具](../../tools/lan/README.zh-CN.md) 会自动处理登录和 token 续期。
 
 ## 8. 排查
 

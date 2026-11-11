@@ -1,6 +1,6 @@
 # 遥测数据格式
 
-> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支 ｜ 依据：固件源码快照 SXM_EW_C3 `5.1.16`、SDMV2 `1.2.12` / `3.1.19`
+> 状态：初版 ｜ 适用：SPM / SDM Open Wi-Fi 全部分支 ｜ 文档对应固件：Basic / Lite 5.1.16，Basic+ 1.2.12，Pro 3.1.19
 
 设备周期性生成一份遥测 JSON（"一包数据"）。这一份 JSON 通过多个通道原样送出，字段只在本页维护。
 
@@ -15,7 +15,7 @@
 | Modbus TCP | 读寄存器，**不是 JSON**，见 [Modbus TCP](../modbus-tcp/modbus-tcp-api.zh-CN.md) | 按需 |
 | BLE | `cmd=read` 后读特征值 | 按需 |
 
-各通道周期互相独立，改法见 [业务命令参考](../ble-common/ble-business-api.zh-CN.md)（`mqtt`、`udp`、`setInterval`）。出厂默认值来自固件源码；以设备实际值为准，可从 `model` 应答读取（MQTT 周期 `MI`、UDP 周期 `UI`，HTTP `/model` 里是 `mqttInterval`、`udpInterval`、`wsInterval`）。
+各通道周期互相独立，改法见 [业务命令参考](../ble-common/ble-business-api.zh-CN.md)（`mqtt`、`udp`、`setInterval`）。出厂默认值以设备实际值为准，可从 `model` 应答读取（MQTT 周期 `MI`、UDP 周期 `UI`，HTTP `/model` 里是 `mqttInterval`、`udpInterval`、`wsInterval`）。
 
 ## 2. 公共字段
 
@@ -39,13 +39,13 @@
 
 | TP | 型号 | 相数 | 出现在 |
 |----|------|------|--------|
-| 1 | `SPM01` | 单相 | Basic、Lite（SXM 构建） |
-| 2 | `SDM01_1PN` | 单相 | Basic、Lite（SXM 构建） |
-| 3 | `SPM02` | 三相 | Basic、Lite（SXM 构建） |
-| 4 | `SDM01_3PN` | 三相 | Basic、Lite（SXM 构建） |
+| 1 | `SPM01` | 单相 | Basic、Lite |
+| 2 | `SDM01_1PN` | 单相 | Basic、Lite |
+| 3 | `SPM02` | 三相 | Basic、Lite |
+| 4 | `SDM01_3PN` | 三相 | Basic、Lite |
 | 5 | `SDM02` | 分相 | Basic、Lite |
-| 8 | SDM01 Gen2 全部型号 | 单相或三相 | Basic+、Pro（SDMV2 C3 / C6 构建） |
-| 9 | SDMV2S3 / H2 构建 | — | 其他构建，本文不覆盖 |
+| 8 | SDM01 Gen2 全部型号 | 单相或三相 | Basic+、Pro |
+| 9 | 其它型号 | — | 本文不覆盖 |
 
 要点：
 
@@ -108,7 +108,7 @@
 | `ReverseEnergyX`、`ReverseEnergyY`、`ReverseEnergyZ`、`TotalReverseEnergy` | kWh |
 | `TotalEnergyX`、`TotalEnergyY`、`TotalEnergyZ`、`TotalEnergy` | kWh |
 
-不同固件版本的字段略有增减（例如 `TotalCurrent`、`TotalReactivePower`、`TotalApparentPower`、`AverageVoltageL_N`、`AverageLineCurrent`、`TotalEnergy*` 在 5.1.16 源码里有，更早的版本可能没有）。解析时请按"有则用，无则忽略"处理。
+不同固件版本的字段略有增减（例如 `TotalCurrent`、`TotalReactivePower`、`TotalApparentPower`、`AverageVoltageL_N`、`AverageLineCurrent`、`TotalEnergy*` 在 5.1.16 里有，更早的版本可能没有）。解析时请按"有则用，无则忽略"处理。
 
 ## 5. 示例
 

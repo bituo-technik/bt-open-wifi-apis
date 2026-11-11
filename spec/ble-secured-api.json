@@ -17,8 +17,7 @@
   },
   "namePrefixes": [
     "SDM",
-    "SPM",
-    "SXM"
+    "SPM"
   ],
   "authMaterial": {
     "pin": "8 digits 0-9 from the meter body (the 11 digits under the QR code decode to it; protocol only knows the 8-digit PIN)",
